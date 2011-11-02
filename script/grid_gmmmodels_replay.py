@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Laurent El Shafey <Laurent.El-Shafey@idiap.ch>
 
-"""Submits all feature creation jobs to the Idiap grid"""
+"""Submits all model creation jobs to the Idiap grid"""
 
 import os, sys, math
 import argparse
@@ -31,7 +31,7 @@ TORCH_DIR = checked_directory(FACEVERIFLIB_DIR, 'torch')
 
 # This is a hard-coded number of array jobs we are targeting, for
 # parametric jobs.
-TOTAL_REPLAY_FILES = 1300
+TOTAL_REPLAY_CLIENTS = 50
 
 # The wrapper is required to bracket the execution environment for the faceveriflib
 # scripts:
@@ -75,14 +75,14 @@ def main():
   jm = JobManager()
 
   # Computes the GMM Stats if linear scoring is performed
-  job_gmmstats = []
-  cmd_gmmstats =  [
-                    'gmm_stats_replay.py',  
+  job_gmmmodels = []
+  cmd_gmmmodels =  [
+                    'gmm_models_replay.py',  
                     '--config-file=%s' % args.config_file, 
                     '--grid'
                   ]
-  job_gmmstats = submit(jm, cmd_gmmstats, array=(1,TOTAL_REPLAY_FILES,1))
-  print 'submitted:', job_gmmstats
+  job_gmmmodels = submit(jm, cmd_gmmmodels, array=(1,TOTAL_REPLAY_CLIENTS,1))
+  print 'submitted:', job_gmmmodels
  
 if __name__ == '__main__':
   main()

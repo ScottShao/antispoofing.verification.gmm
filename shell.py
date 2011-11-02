@@ -9,7 +9,7 @@ import sys
 import subprocess
 
 # Choose here the torch release you want to use:
-DEFAULT_TORCH_DIR = '/Users/andre/work/torch5spro'
+DEFAULT_TORCH_DIR = '/idiap/home/aanjos/work/torch/main'
 
 def find_install_dir():
   """Test to see if I find my own libraries, otherwise, we are probably running

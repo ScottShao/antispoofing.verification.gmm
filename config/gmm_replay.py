@@ -4,12 +4,16 @@ import os
 import torch
 
 # 0/ The database to use
-base_output_dir = "results"
+#base_output_dir = "results"
+base_output_dir = "/idiap/temp/aanjos/spoofing/verif"
 
 # 1/ Face normalization
-video_input_dir = '/Users/andre/work/replay/protocols'
-pos_input_dir = '/Users/andre/work/replay/protocols/keylemon-face-locations'
+#video_input_dir = '/Users/andre/work/replay/protocols'
+video_input_dir = '/idiap/group/replay/database/protocols'
+pos_input_dir = os.path.join(video_input_dir, 'keylemon-face-locations')
 features_dir = os.path.join(base_output_dir, "features")
+accumulate_frames = 220 #use up to frame #225
+acc_features_dir = os.path.join(base_output_dir, "accumulated-features")
 every_n_frames = 10 #means: take 1 in every N frames
 
 # Cropping
@@ -35,7 +39,7 @@ OVERLAP_W = 7
 N_DCT_COEF = 28
 
 # 2/ UBM
-frames_to_use = 375 #use up to 370 frames
+frames_to_use = 375 #use up to frame #375
 ubm_filename = os.path.join(base_output_dir, "ubm.hdf5")
 nb_gaussians = 512
 iterk = 500
@@ -49,6 +53,7 @@ norm_KMeans = True
 
 # 3/ GMM
 gmmstats_dir = os.path.join(base_output_dir, "gmmstats")
+acc_gmmstats_dir = os.path.join(base_output_dir, "accumulated-gmmstats")
 tnorm_models_dir = os.path.join(base_output_dir, "tnorm_models")
 iterg_enrol = 1
 convergence_threshold = 0.0005
