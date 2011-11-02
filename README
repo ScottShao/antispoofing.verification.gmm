@@ -1,0 +1,8 @@
+Order of execution:
+
+0. Tune configuration at: config/gmm_replay.py
+1. Run replay_dct_features.py to create the features
+2. Run gmm_ubm_replay.py to create the UBM from selected features.
+   Note: if you use ~1k files, it will take ~3 hours to complete.
+3. Run gmm_stats_replay.py to create the background statistics for all
+   datafiles

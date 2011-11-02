@@ -1,0 +1,6 @@
+*~
+*.swp
+*.pyc
+build
+.DS_Store
+.gdb_history
