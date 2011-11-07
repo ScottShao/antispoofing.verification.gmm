@@ -81,7 +81,7 @@ def main():
                     '--config-file=%s' % args.config_file, 
                     '--grid'
                   ]
-  job_gmmstats = submit(jm, cmd_gmmstats, array=(1,TOTAL_REPLAY_FILES,1))
+  job_gmmstats = submit(jm, cmd_gmmstats, array=(1201,TOTAL_REPLAY_FILES,1))
   print 'submitted:', job_gmmstats
  
 if __name__ == '__main__':

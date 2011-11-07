@@ -27,7 +27,7 @@ def main():
   # Database
   db = torch.db.replay.Database()
 
-  process = db.files()
+  process = db.files(cls=('attack','real','enroll'))
 
   # finally, if we are on a grid environment, just find what I have to process.
   if args.grid:

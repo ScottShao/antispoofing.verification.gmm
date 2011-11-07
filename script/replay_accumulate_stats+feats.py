@@ -39,15 +39,25 @@ def main():
   for key, stem in files.iteritems():
 
     # vertical stack features
+    output_file = os.path.join(config.acc_features_dir, "up-to-%d" %
+      config.accumulate_frames, stem + '.hdf5')
+    if os.path.exists(output_file):
+      print "Not re-running for existing file %s" % output_file
+      continue
+
     print "Concatenating %d arrays for stem %s" % (len(use_dirs), stem)
     arrays = []
     for frame_no in use_dirs:
+      array_file = os.path.join(config.features_dir, frame_no, stem + '.hdf5')
+      
+      if not os.path.exists(array_file):
+        print "Cannot find file %s - skipping" % array_file
+        continue
+
       arrays.append(torch.core.array.load(os.path.join(config.features_dir,
         frame_no, stem + '.hdf5')))
     # stack the arrays into one gigantic array and write to file.
     cated = torch.core.array.cat(arrays, 0)
-    output_file = os.path.join(config.acc_features_dir, "up-to-%d" %
-      config.accumulate_frames, stem + '.hdf5')
     utils.ensure_dir(os.path.dirname(output_file))
     print "Saving %d arrays at %s" % (len(use_dirs), output_file)
     cated.save(output_file)
@@ -62,9 +72,15 @@ def main():
     sumPx = None
     sumPxx = None
     for frame_no in use_dirs:
+
+      hdf5_path = os.path.join(config.gmmstats_dir, frame_no, stem + '.hdf5')
+      if not os.path.exists(hdf5_path):
+        print "Cannot find file %s - skipping" % hdf5_path
+        continue
+
       h5f = torch.io.HDF5File(os.path.join(config.gmmstats_dir,
-        frame_no, stem + '.hdf5'))
-      if T is None: 
+        frame_no, stem + '.hdf5'), 'r')
+      if T is None:
         T = h5f.read('T')
         log_liklihood = h5f.read('log_liklihood')
         n = h5f.read('n')
@@ -78,6 +94,7 @@ def main():
         n += h5f.read('n')
         sumPx += h5f.read('sumPx')
         sumPxx += h5f.read('sumPxx')
+
     output_file = os.path.join(config.acc_gmmstats_dir, "up-to-%d" %
       config.accumulate_frames, stem + '.hdf5')
     utils.ensure_dir(os.path.dirname(output_file))
