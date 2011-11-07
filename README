@@ -29,7 +29,6 @@ vim config/gmm_replay.py
 ./shell.py -- script/gmm_ubm_replay.py --config=config/gmm_replay.py
 
 # 5) UBM STATISTICS GENERATION
-# WARNING: THIS STEP IS NOT NECESSARY WITH LINEAR SCORING - SKIP IT!
 # Run gmm_stats_replay.py to create the background statistics for all
 # datafiles so we can run score normalization later.
 # This step requires that the UBM is calculated and all features are available.
@@ -58,19 +57,7 @@ vim config/gmm_replay.py
 
 ./shell.py -- ./script/grid_gmmmodels_replay.py --config=config/gmm_replay.py
 
-# 7) FEATURE ACCUMULATION (OPTIMIZATION STEP)
-# Create accumulated features for the number of frames for which you desire
-# to plot your curves with:
-
-./shell.py -- ./script/replay_accumulate_features.py --config=config/gmm_replay.py
-
-# Note: If you went through step 5, you may also want to accumulate the UBM
-# statistics for running every video against every model. In this case, use the
-# program:
-
-./shell.py -- ./script/replay_accumulate_stats+feats.py --config=config/gmm_replay.py
-
-# 8) SCORING
+# 7) SCORING
 # In this step you will score the videos (every N frames up to a certain frame
-# number) against the generated client models. We do this exhaustively.
-
+# number) against the generated client models. We do this exhaustively for both
+# the test and development data.

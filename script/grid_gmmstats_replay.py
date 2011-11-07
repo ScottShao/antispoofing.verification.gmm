@@ -31,7 +31,7 @@ TORCH_DIR = checked_directory(FACEVERIFLIB_DIR, 'torch')
 
 # This is a hard-coded number of array jobs we are targeting, for
 # parametric jobs.
-TOTAL_REPLAY_FILES = 1300
+TOTAL_REPLAY_FILES = 840
 
 # The wrapper is required to bracket the execution environment for the faceveriflib
 # scripts:
@@ -81,7 +81,7 @@ def main():
                     '--config-file=%s' % args.config_file, 
                     '--grid'
                   ]
-  job_gmmstats = submit(jm, cmd_gmmstats, array=(1201,TOTAL_REPLAY_FILES,1))
+  job_gmmstats = submit(jm, cmd_gmmstats, array=(1,TOTAL_REPLAY_FILES,1))
   print 'submitted:', job_gmmstats
  
 if __name__ == '__main__':

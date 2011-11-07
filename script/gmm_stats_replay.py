@@ -21,13 +21,14 @@ def main():
   args = parser.parse_args()
 
   # Loads the configuration 
-  import imp 
+  import imp
   config = imp.load_source('config', args.config_file)
 
   # Database
   db = torch.db.replay.Database()
 
-  process = db.files(cls=('attack','real','enroll'))
+  # Run for attacks and real-accesses for the development and test groups
+  process = db.files(cls=('attack','real'), groups=('devel', 'test'))
 
   # finally, if we are on a grid environment, just find what I have to process.
   if args.grid:
@@ -48,7 +49,7 @@ def main():
       gmmstats_output.append(os.path.join(config.gmmstats_dir, d, value + '.hdf5'))
 
   import gmm
-    
+
   gmm.gmm_stats(dict(enumerate(features_input)), 
       config.ubm_filename, dict(enumerate(gmmstats_output)), args.force)
 

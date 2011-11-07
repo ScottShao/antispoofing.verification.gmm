@@ -12,8 +12,6 @@ base_output_dir = "/idiap/temp/aanjos/spoofing/verif"
 video_input_dir = '/idiap/group/replay/database/protocols'
 pos_input_dir = os.path.join(video_input_dir, 'keylemon-face-locations')
 features_dir = os.path.join(base_output_dir, "features")
-accumulate_frames = 220 #use up to frame #225
-acc_features_dir = os.path.join(base_output_dir, "accumulated-features")
 every_n_frames = 10 #means: take 1 in every N frames
 
 # Cropping
@@ -53,7 +51,6 @@ norm_KMeans = True
 
 # 3/ GMM
 gmmstats_dir = os.path.join(base_output_dir, "gmmstats")
-acc_gmmstats_dir = os.path.join(base_output_dir, "accumulated-gmmstats")
 tnorm_models_dir = os.path.join(base_output_dir, "tnorm_models")
 iterg_enrol = 1
 convergence_threshold = 0.0005

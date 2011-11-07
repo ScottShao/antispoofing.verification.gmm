@@ -28,16 +28,16 @@ def main():
   # (sorted) list of models
   enroll_list = db.files(cls='enroll')
   client_list = set()
-  for key, value in enroll_list():
+  for key, value in enroll_list.iteritems():
     client_id = value.split('_')[0].split('/')[1]
     client_list.add(client_id)
   client_list = sorted(list(client_list))
 
   # List of probes
-  probe_dict = db.files(protocol='print',
-      directory=config.accumulated_gmmstats_dir,
-      extension='.hdf5')
-  probe_stem = db.files(protocol='print')
+  features_dir = os.path.join(config.acc_features_dir, "up-to-%d" % \
+      config.accumulate_frames)
+  probe_dict = db.files(directory=features_dir, extension='.hdf5')
+  probe_stem = db.files()
 
   # finally, if we are on a grid environment, just find what I have to process.
   if args.grid:
@@ -45,11 +45,13 @@ def main():
     if pos >= len(client_list):
       raise RuntimeError, "Grid request for job %d on a setup with %d jobs" % \
           (pos, len(client_list))
-    cilent_list = [client_list[pos]] # gets the right key
+    client_list = [client_list[pos]] # gets the right key
 
   # loops over the model ids and compute scores
   import gmm
   for model_id in client_list:
+
+    # Calculates the UBM statistics to load
     
     # Results go arranged by model id:
     base_output_dir = os.path.join(config.scores_dir, model_id)
@@ -61,7 +63,7 @@ def main():
     model_filename = os.path.join(config.models_dir, model_id + '.hdf5')
     gmm.gmm_scores_replay(model_filename,
         probe_dict, probe_stem,
-        config.ubm_filename, 
+        config.ubm_filename,
         base_output_dir)
 
 if __name__ == "__main__": 

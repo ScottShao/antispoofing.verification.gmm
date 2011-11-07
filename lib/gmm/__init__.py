@@ -205,9 +205,53 @@ def gmm_scores_replay(model_filename, probe_files, probe_stem, ubm_filename,
 
   # For every probe, run an individual test
   for k in sorted(probe_files.keys()):
+    probe_tests = [torch.machine.GMMStats(torch.io.HDF5File(str(probe_files[k])))]
     # Saves the A row vector for each model and Z-Norm samples split
-    A = torch.machine.linearScoring(models, ubm, [probe_files[k]])
+    A = torch.machine.linearScoring(models, ubm, probe_tests, None, True)
     torch.io.Array(A).save(os.path.join(output_dir, probe_stem[k] + ".hdf5"))
+
+def gmm_scores_A(models_ids, models_dir, probe_files, ubm_filename, db,
+                 zt_norm_A_dir, scores_nonorm_dir, group, probes_split_id):
+  """Computes a split of the A matrix for the ZT-Norm and saves the raw scores to file"""
+  
+  # Loads the UBM 
+  if not os.path.exists(ubm_filename):
+      raise RuntimeError, "Cannot find UBM %s" % (ubm_filename) 
+  ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))    
+
+  # Gets the probe samples (as well as their corresponding client ids)
+  probe_tests = []
+  probe_clients_ids = []
+  for k in sorted(probe_files.keys()):
+    if not os.path.exists(str(probe_files[k][0])):
+      raise RuntimeError, "Cannot find GMM statistics %s for this Z-Norm sample." % (probe_files[k][0])
+    stats = torch.machine.GMMStats(torch.io.HDF5File(str(probe_files[k][0])))
+    probe_tests.append(stats)
+    probe_clients_ids.append(probe_files[k][3])
+
+  # Loads the models
+  models = []
+  clients_ids = []
+  for model_id in models_ids:
+    model_path = os.path.join(models_dir, str(model_id) + ".hdf5")
+    if not os.path.exists(model_path):
+      raise RuntimeError, "Could not find model %s." % model_path
+    models = [torch.machine.GMMMachine(torch.io.HDF5File(model_path))]
+    clients_ids = [db.getClientIdFromModelId(model_id)]
+
+    # Saves the A row vector for each model and Z-Norm samples split
+    A = torch.machine.linearScoring(models, ubm, probe_tests)
+    torch.io.Array(A).save(os.path.join(zt_norm_A_dir, group, str(model_id) + "_" + str(probes_split_id).zfill(4) + ".hdf5"))
+
+    # Saves to text file
+    import utils
+    scores_list = utils.convertScoreToList(A.as_row(), probe_files)
+    sc_nonorm_filename = os.path.join(scores_nonorm_dir, group, str(model_id) + "_" + str(probes_split_id).zfill(4) + ".txt")
+    f_nonorm = open(sc_nonorm_filename, 'w')
+    for x in scores_list:
+      f_nonorm.write(str(x[2]) + " " + str(x[0]) + " " + str(x[3]) + " " + str(x[4]) + "\n")
+    f_nonorm.close()
+
 
 def gmm_ztnorm_B(models_ids, models_dir, zfiles, ubm_filename, db,
                  zt_norm_B_dir, group, zsamples_split_id):
