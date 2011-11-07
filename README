@@ -17,7 +17,7 @@ vim config/gmm_replay.py
 # Run replay_dct_features.py to create the features. This step only need the
 # original database videos as input.
 
-./shell.py -- script/replay_dct_features.py --config=config/gmm_replay.py
+./shell.py -- script/replay_dct_features.py --config-file=config/gmm_replay.py
 
 # 4) UBM TRAINING
 # Run gmm_ubm_replay.py to create the UBM from selected features.
@@ -26,20 +26,20 @@ vim config/gmm_replay.py
 # This step requires all features for the training set/enrollment are
 # calculated.
 
-./shell.py -- script/gmm_ubm_replay.py --config=config/gmm_replay.py
+./shell.py -- script/gmm_ubm_replay.py --config-file=config/gmm_replay.py
 
 # 5) UBM STATISTICS GENERATION
 # Run gmm_stats_replay.py to create the background statistics for all
 # datafiles so we can run score normalization later.
 # This step requires that the UBM is calculated and all features are available.
 
-./shell.py -- script/gmm_stats_replay.py --config=config/gmm_replay.py
+./shell.py -- script/gmm_stats_replay.py --config-file=config/gmm_replay.py
 
 # This will take a lot of time to go through all the videos in the replay
 # database. You can optionally submit the command to the grid, if you are at
 # Idiap, with the following:
 
-./shell.py -- ./script/grid_gmmstats_replay.py --config=config/gmm_replay.py
+./shell.py -- ./script/grid_gmmstats_replay.py --config-file=config/gmm_replay.py
 
 # This command will spread the GMM UBM statistics calculation over 840
 # processes that will run in about 5-10 minutes each. So, the whole job will
@@ -51,23 +51,33 @@ vim config/gmm_replay.py
 # step 5 above as it only depends on the input features pre-calculated at step
 # 3.
 
-./shell.py -- ./script/gmm_models_replay.py --config=config/gmm_replay.py
+./shell.py -- ./script/gmm_models_replay.py --config-file=config/gmm_replay.py
 
 # If you think the above job is too slow, you also have a grid alternative:
 
-./shell.py -- ./script/grid_gmmmodels_replay.py --config=config/gmm_replay.py
+./shell.py -- ./script/grid_gmmmodels_replay.py --config-file=config/gmm_replay.py
 
 # 7) SCORING
 # In this step you will score the videos (every N frames up to a certain frame
 # number) against the generated client models. We do this exhaustively for both
 # the test and development data. Command line execution goes like this:
 
-./shell.py -- ./script/gmm_scores_replay.py --config=config/gmm_replay.py
+./shell.py -- ./script/gmm_scores_replay.py --config-file=config/gmm_replay.py
 
 # Linear scoring is fast, but you can also submit a client-based break-down of
 # this problem like this:
 
-./shell.py -- ./script/grid_gmmscores_replay.py --config=config/gmm_replay.py
+./shell.py -- ./script/grid_gmmscores_replay.py --config-file=config/gmm_replay.py
+
+# 8) PERFORMANCE FIGURES
+# After scores are calculated, you need to put them together to setup
+# development and test text files in either 4 or 5 column formats. To do that,
+# use the application "replay_perf_table.py":
+
+./shell.py -- ./script/replay_perf_table.py --config-file=config/gmm_replay.py
+
+# After this step, you are on your own to plot the performance tables as your
+# liking.
 
 --
 07.November.2011
