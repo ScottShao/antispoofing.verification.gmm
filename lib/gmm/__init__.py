@@ -188,8 +188,7 @@ def gmm_enrol_model(enrol_files, model_path, ubm_filename,
   # Saves it to the given file
   gmm.save(torch.io.HDF5File(model_path))
 
-def gmm_scores_replay(model_filename, probe_files, probe_stem, ubm_filename,
-    output_dir):
+def gmm_scores_replay(model_filename, probe_file, probe_output, ubm_filename):
   """Computes a split of the A matrix for the ZT-Norm and saves the raw scores to file"""
   
   # Loads the UBM 
@@ -198,17 +197,19 @@ def gmm_scores_replay(model_filename, probe_files, probe_stem, ubm_filename,
   ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))
 
   # Loads the models
-  models = []
+  model = []
   if not os.path.exists(model_filename):
     raise RuntimeError, "Could not find model %s." % model_filename
-  models = [torch.machine.GMMMachine(torch.io.HDF5File(model_filename))]
+  model = [torch.machine.GMMMachine(torch.io.HDF5File(model_filename))]
 
   # For every probe, run an individual test
-  for k in sorted(probe_files.keys()):
-    probe_tests = [torch.machine.GMMStats(torch.io.HDF5File(str(probe_files[k])))]
+  for k,v in enumerate(probe_file):
+    stats = [torch.machine.GMMStats(torch.io.HDF5File(str(v)))]
     # Saves the A row vector for each model and Z-Norm samples split
-    A = torch.machine.linearScoring(models, ubm, probe_tests, None, True)
-    torch.io.Array(A).save(os.path.join(output_dir, probe_stem[k] + ".hdf5"))
+    A = torch.machine.linearScoring(model, ubm, stats, None, True)
+    utils.ensure_dir(os.path.dirname(probe_output[k]))
+    A.save(probe_output[k])
+    print "Processed (%d/%d)\n  %s\n  %s" % (k+1, len(probe_file), v, probe_output[k])
 
 def gmm_scores_A(models_ids, models_dir, probe_files, ubm_filename, db,
                  zt_norm_A_dir, scores_nonorm_dir, group, probes_split_id):

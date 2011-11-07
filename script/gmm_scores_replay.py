@@ -2,7 +2,8 @@
 # vim: set fileencoding=utf-8 :
 # Laurent El Shafey <Laurent.El-Shafey@idiap.ch>
 
-import os, math
+import os
+import sys
 import torch
 import utils
 
@@ -26,45 +27,62 @@ def main():
   db = torch.db.replay.Database()
 
   # (sorted) list of models
-  enroll_list = db.files(cls='enroll')
+  print "Querying database for model names...",
+  sys.stdout.flush()
+  enroll_list = db.files(cls='enroll', groups=('devel', 'test'))
   client_list = set()
   for key, value in enroll_list.iteritems():
     client_id = value.split('_')[0].split('/')[1]
     client_list.add(client_id)
   client_list = sorted(list(client_list))
+  print "%d models" % len(client_list)
 
   # List of probes
-  features_dir = os.path.join(config.acc_features_dir, "up-to-%d" % \
-      config.accumulate_frames)
-  probe_dict = db.files(directory=features_dir, extension='.hdf5')
-  probe_stem = db.files()
+  print "Listing files to be probed...",
+  sys.stdout.flush()
+  L = db.files(cls=('attack','real'), groups=('devel', 'test')).values()
+  files = []
+  for d in os.listdir(config.gmmstats_dir):
+    files += [os.path.join(d,k) for k in L \
+        if os.path.exists(os.path.join(config.gmmstats_dir, d , k + '.hdf5'))]
+  print "%d probes" % len(files)
+ 
+  # This is the fixed list of input files.
+  print "Setting up input file list...",
+  sys.stdout.flush()
+  input_files = [os.path.join(config.gmmstats_dir, k + '.hdf5') for k in files]
+  print "done"
 
   # finally, if we are on a grid environment, just find what I have to process.
   if args.grid:
+    print "Setting-up grid execution for task id = %s..." % (os.environ['SGE_TASK_ID']),
     pos = int(os.environ['SGE_TASK_ID']) - 1
     if pos >= len(client_list):
       raise RuntimeError, "Grid request for job %d on a setup with %d jobs" % \
           (pos, len(client_list))
     client_list = [client_list[pos]] # gets the right key
+    print "done"
 
   # loops over the model ids and compute scores
   import gmm
   for model_id in client_list:
 
-    # Calculates the UBM statistics to load
-    
     # Results go arranged by model id:
     base_output_dir = os.path.join(config.scores_dir, model_id)
 
     # Checks that the base directories for storing the scores exist
     utils.ensure_dir(base_output_dir)
 
+    # Creates temporary lists for the input and output
+    output_files = [os.path.join(base_output_dir, k + '.hdf5') for k in files]
+
     # Computes the raw scores (i.e. ZT-Norm A matrix or a split of it)
     model_filename = os.path.join(config.models_dir, model_id + '.hdf5')
-    gmm.gmm_scores_replay(model_filename,
-        probe_dict, probe_stem,
-        config.ubm_filename,
-        base_output_dir)
+
+    print "Running analysis for model %s (%s)..." % (model_id, model_filename)
+
+    gmm.gmm_scores_replay(model_filename, input_files, output_files,
+        config.ubm_filename)
 
 if __name__ == "__main__": 
   main()

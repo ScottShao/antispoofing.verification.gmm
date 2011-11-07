@@ -41,7 +41,7 @@ vim config/gmm_replay.py
 
 ./shell.py -- ./script/grid_gmmstats_replay.py --config=config/gmm_replay.py
 
-# This command will spread the GMM UBM statistics calculation over 1300
+# This command will spread the GMM UBM statistics calculation over 840
 # processes that will run in about 5-10 minutes each. So, the whole job will
 # take a few hours to complete - taking into consideration current settings
 # for SGE at Idiap.
@@ -60,4 +60,15 @@ vim config/gmm_replay.py
 # 7) SCORING
 # In this step you will score the videos (every N frames up to a certain frame
 # number) against the generated client models. We do this exhaustively for both
-# the test and development data.
+# the test and development data. Command line execution goes like this:
+
+./shell.py -- ./script/gmm_scores_replay.py --config=config/gmm_replay.py
+
+# Linear scoring is fast, but you can also submit a client-based break-down of
+# this problem like this:
+
+./shell.py -- ./script/grid_gmmscores_replay.py --config=config/gmm_replay.py
+
+--
+07.November.2011
+Andre Anjos

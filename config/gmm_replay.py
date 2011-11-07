@@ -39,6 +39,7 @@ N_DCT_COEF = 28
 # 2/ UBM
 frames_to_use = 375 #use up to frame #375
 ubm_filename = os.path.join(base_output_dir, "ubm.hdf5")
+gmmstats_dir = os.path.join(base_output_dir, "gmmstats")
 nb_gaussians = 512
 iterk = 500
 iterg_train = 500
@@ -50,7 +51,6 @@ update_variances = True
 norm_KMeans = True
 
 # 3/ GMM
-gmmstats_dir = os.path.join(base_output_dir, "gmmstats")
 tnorm_models_dir = os.path.join(base_output_dir, "tnorm_models")
 iterg_enrol = 1
 convergence_threshold = 0.0005
@@ -59,6 +59,7 @@ relevance_factor = 4
 responsibilities_threshold = 0
 
 models_dir = os.path.join(base_output_dir, "models")
+scores_dir = os.path.join(base_output_dir, "scores")
 
 linear_scoring = True
 zt_norm = False
