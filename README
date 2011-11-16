@@ -76,6 +76,12 @@ vim config/gmm_replay.py
 
 ./shell.py -- ./script/replay_perf_table.py --config-file=config/gmm_replay.py
 
+# 9) Score histograms
+# You can plot the histograms of scores distributions using the following
+# command:
+
+./shell.py -- script/plot_scores.py /idiap/temp/aanjos/spoofing/verif/performance/test-base-thourough-verif.4c /idiap/temp/aanjos/spoofing/verif/performance/test-photo-220.4c --overlay-protocol="Photo Attack" --title="Baseline GMM and PHOTO-ATTACK (spoofs) - Test set"
+
 # After this step, you are on your own to plot the performance tables as your
 # liking.
 
