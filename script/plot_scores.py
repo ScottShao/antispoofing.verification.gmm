@@ -44,7 +44,7 @@ def main():
 
   mpl.title(args.title)
   mpl.xlabel("Verification Scores")
-  mpl.ylabel("Count")
+  mpl.ylabel("Normalized Count")
   mpl.grid()
   mpl.legend()
   mpl.savefig("score-dist.pdf")
