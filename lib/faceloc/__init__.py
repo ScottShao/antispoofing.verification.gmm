@@ -85,7 +85,7 @@ class BoundingBox:
 
   def draw(self, image, thickness=2, color=(255,0,0)):
     """Draws a bounding box on a given image. If the image is colored, it is
-    considered to be RGB in the Torch standard image representation, otherwise,
+    considered to be RGB in the bob standard image representation, otherwise,
     we first convert the color into grayscale to then apply the bounding
     box."""
 
