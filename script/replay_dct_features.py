@@ -10,7 +10,7 @@ database. We calculate features for every 10th frame in the video input.
 import sys
 import os
 import argparse
-import torch
+import bob
 
 def main():
 
@@ -31,7 +31,7 @@ def main():
   import faceloc
 
   # Directories containing the images and the annotations
-  db = torch.db.replay.Database()
+  db = bob.db.replay.Database()
   files = db.files(cls=('real', 'attack', 'enroll'), 
       directory=config.video_input_dir, extension='.mov')
 
@@ -39,7 +39,7 @@ def main():
     print "Processing file %d (%d/%d)..." % (key, index+1, len(files))
     
     # bootstraps video reader for client
-    video = torch.io.VideoReader(files[key])
+    video = bob.io.VideoReader(files[key])
 
     # loads face locations - roll localization
     stem = db.paths([key])[0]

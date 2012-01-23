@@ -2,28 +2,29 @@
 # vim: set fileencoding=utf-8 :
 # Laurent El Shafey <Laurent.El-Shafey@idiap.ch>
 
-import os, math
+import os
+import math
 import utils
-import torch
+import bob
+import numpy
 
 def normalizeBlocks(src):
-  for i in range(src.extent(0)):
+  for i in range(src.shape[0]):
     block = src[i, :, :]
-    mean = torch.core.array.float64_2.mean(block)
-    std = torch.core.array.float64_2.sum((block - mean) ** 2) / block.size()
+    mean = block.mean()
+    std = ((block - mean) ** 2).sum() / block.size()
     if std == 0:
       std = 1
     else:
       std = math.sqrt(std)
 
     src[i, :, :] = (block - mean) / std
-
     
 def normalizeDCT(src):
-  for i in range(src.extent(1)):
+  for i in range(src.shape[1]):
     col = src[:, i]
-    mean = torch.core.array.float64_1.mean(col)
-    std = torch.core.array.float64_1.sum((col - mean) ** 2) / col.size()
+    mean = col.mean()
+    std = ((col - mean) ** 2).sum() / col.size()
     if std == 0:
       std = 1
     else:
@@ -31,13 +32,12 @@ def normalizeDCT(src):
 
     src[:, i] = (col - mean) / std
 
-
 def dctfeatures(prep, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W, 
     A_N_DCT_COEF, norm_before, norm_after, add_xy):
   
-  blockShape = torch.ip.getBlockShape(prep, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W)
-  blocks = torch.core.array.float64_3(blockShape)
-  torch.ip.block(prep, blocks, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W)
+  blockShape = bob.ip.getBlockShape(prep, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W)
+  blocks = numpy.ndarray(blockShape, 'float64')
+  bob.ip.block(prep, blocks, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W)
 
   if norm_before:
     normalizeBlocks(blocks)
@@ -49,7 +49,7 @@ def dctfeatures(prep, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W,
 
   
   # Initializes cropper and destination array
-  DCTF = torch.ip.DCTFeatures(A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W, real_DCT_coef)
+  DCTF = bob.ip.DCTFeatures(A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W, real_DCT_coef)
   
   # Calls the preprocessing algorithm
   dct_blocks = DCTF(blocks)
@@ -69,9 +69,9 @@ def dctfeatures(prep, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W,
     dct_blocks_max -= 2
     TMP_tensor_min += 2
   
-  TMP_tensor = torch.core.array.float64_2(n_blocks, TMP_tensor_max)
+  TMP_tensor = numpy.array((n_blocks, TMP_tensor_max), 'float64')
   
-  nBlocks = torch.ip.getNBlocks(prep, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W)
+  nBlocks = bob.ip.getNBlocks(prep, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W)
   for by in range(nBlocks[0]):
     for bx in range(nBlocks[1]):
       bi = bx + by * nBlocks[1]
@@ -93,12 +93,12 @@ def compute(img_input, pos_input, features_output,
   BLOCK_H, BLOCK_W, OVERLAP_H, OVERLAP_W, N_DCT_COEF, first_annot, force):
 
   # Initializes cropper and destination array
-  FEN = torch.ip.FaceEyesNorm( CROP_EYES_D, CROP_H, CROP_W, CROP_OH, CROP_OW)
-  cropped_img = torch.core.array.float64_2(CROP_H, CROP_W)
+  FEN = bob.ip.FaceEyesNorm( CROP_EYES_D, CROP_H, CROP_W, CROP_OH, CROP_OW)
+  cropped_img = numpy.ndarray((CROP_H, CROP_W), 'float64')
 
   # Initializes the Tan and Triggs preprocessing
-  TT = torch.ip.TanTriggs( GAMMA, SIGMA0, SIGMA1, SIZE, THRESHOLD, ALPHA)
-  preprocessed_img = torch.core.array.float64_2(CROP_H, CROP_W)
+  TT = bob.ip.TanTriggs( GAMMA, SIGMA0, SIGMA1, SIZE, THRESHOLD, ALPHA)
+  preprocessed_img = numpy.ndarray((CROP_H, CROP_W), 'float64')
 
   # Processes the 'dictionary of files'
   for k in img_input:
@@ -112,11 +112,11 @@ def compute(img_input, pos_input, features_output,
       print "Computing features from sample %s." % (img_input[k])
 
       # Loads image file
-      img_unk = torch.core.array.load( str(img_input[k]) )
+      img_unk = bob.io.load( str(img_input[k]) )
       
       # Converts to grayscale
-      if(img_unk.dimensions() == 3):
-        img = torch.ip.rgb_to_gray(img_unk)
+      if(len(img_unk.shape) == 3):
+        img = bob.ip.rgb_to_gray(img_unk)
       else:
         img = img_unk
 
@@ -143,15 +143,15 @@ def compute_loaded_replay(img_input, pos_input, features_output,
   BLOCK_H, BLOCK_W, OVERLAP_H, OVERLAP_W, N_DCT_COEF):
 
   # Initializes cropper and destination array
-  FEN = torch.ip.FaceEyesNorm( CROP_EYES_D, CROP_H, CROP_W, CROP_OH, CROP_OW)
-  cropped_img = torch.core.array.float64_2(CROP_H, CROP_W)
+  FEN = bob.ip.FaceEyesNorm( CROP_EYES_D, CROP_H, CROP_W, CROP_OH, CROP_OW)
+  cropped_img = numpy.ndarray((CROP_H, CROP_W), 'float64')
 
   # Initializes the Tan and Triggs preprocessing
-  TT = torch.ip.TanTriggs( GAMMA, SIGMA0, SIGMA1, SIZE, THRESHOLD, ALPHA)
-  preprocessed_img = torch.core.array.float64_2(CROP_H, CROP_W)
+  TT = bob.ip.TanTriggs( GAMMA, SIGMA0, SIGMA1, SIZE, THRESHOLD, ALPHA)
+  preprocessed_img = numpy.ndarray((CROP_H, CROP_W), 'float64')
 
   # Converts to grayscale
-  if(img_input.dimensions() == 3): img = torch.ip.rgb_to_gray(img_input)
+  if(len(img_input.shape) == 3): img = bob.ip.rgb_to_gray(img_input)
   else: img = img_input
 
   (LW, LH), (RW, RH) = pos_input

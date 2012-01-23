@@ -5,7 +5,7 @@
 
 """Support methods and classes for reading face locations from text files."""
 
-import torch
+import bob
 from .anthropometry import * #classes for determining eye-locations from bb
 
 def expand_detections(detections, nframes, max_age=-1):
@@ -91,12 +91,11 @@ class BoundingBox:
 
     if image.rank() == 2: #grayscale
       if isinstance(color, (tuple, list)):
-        import torch
-        color = torch.ip.rgb_to_gray_u8(*color)
+        color = bob.ip.rgb_to_gray_u8(*color)
 
     # draws one line for each size of the bounding box
     for k in range(thickness):
-      torch.ip.draw_box(image, self.x-k, self.y-k, self.width+2*k, 
+      bob.ip.draw_box(image, self.x-k, self.y-k, self.width+2*k, 
           self.height+2*k)
 
 def read_face(filename):

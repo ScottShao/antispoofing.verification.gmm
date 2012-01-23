@@ -3,8 +3,8 @@
 # Laurent El Shafey <Laurent.El-Shafey@idiap.ch>
 
 import os
-import torch
-
+import bob
+import numpy
 
 def hist_inter_2D(a, b):
   """Computes the histogram intersection between two arrays of histograms"""

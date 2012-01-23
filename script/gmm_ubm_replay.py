@@ -3,7 +3,7 @@
 # Laurent El Shafey <Laurent.El-Shafey@idiap.ch>
 
 import os
-import torch
+import bob
 import utils
 
 import argparse
@@ -23,7 +23,7 @@ def main():
   config = imp.load_source('config', args.config_file)
 
   # Database
-  db = torch.db.replay.Database()
+  db = bob.db.replay.Database()
 
   # Remove old file if required
   if args.force and os.path.exists(config.ubm_filename):

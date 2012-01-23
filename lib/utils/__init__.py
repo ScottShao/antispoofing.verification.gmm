@@ -3,7 +3,8 @@
 # Laurent El Shafey <Laurent.El-Shafey@idiap.ch>
 
 import os
-import torch
+import bob
+import numpy
 
 def ensure_dir(dirname):
   """ Creates the directory dirname if it does not already exist,
@@ -17,7 +18,6 @@ def ensure_dir(dirname):
     # Check that the directory exists
     if os.path.isdir(dirname): pass
     else: raise
-
 
 def split_dictionary(input_dict, nb_unit_per_subdict):
   """Splits a dictionary into a list of subdictionaries"""  
@@ -38,7 +38,6 @@ def split_dictionary(input_dict, nb_unit_per_subdict):
   
   return res 
 
-
 def convertScoreToList(scores, probes):
   ret = []
   i = 0
@@ -47,10 +46,9 @@ def convertScoreToList(scores, probes):
     i+=1
   return ret
 
-
 def probes_used_generate_vector(probe_files_full, probe_files_model):
   """Generates boolean matrices indicating which are the probes for each model"""
-  C_probesUsed = torch.core.array.bool_1((len(probe_files_full,),))
+  C_probesUsed = numpy.ndarray(len(probe_files_full), 'bool')
   C_probesUsed.fill(False)
   c=0 
   for k in sorted(probe_files_full.keys()):
@@ -61,7 +59,7 @@ def probes_used_generate_vector(probe_files_full, probe_files_model):
 def probes_used_extract_scores(full_scores, same_probes):
   """Extracts a matrix of scores for a model, given a probes_used row vector of boolean"""
   if full_scores.extent(1) != same_probes.extent(0): raise "Size mismatch"
-  model_scores = torch.core.array.float64_2((full_scores.extent(0),same_probes.count()))
+  model_scores = numpy.ndarray((full_scores.extent(0),same_probes.count()), 'float64')
   c=0
   for i in range(0,full_scores.extent(1)):
     if same_probes[i]:

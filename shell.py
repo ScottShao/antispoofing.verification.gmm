@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
-"""Sets up the faceverif_lib using a torch backend. All arguments passed to this
-script are forwarded to the underlying torch shell.py.
+"""Sets up the faceverif_lib using a bob backend. All arguments passed to this
+script are forwarded to the underlying bob shell.py.
 """
 
 import os
 import sys
 import subprocess
 
-# Choose here the torch release you want to use:
-DEFAULT_TORCH_DIR = '/idiap/home/aanjos/work/torch/main'
+# Choose here the bob release you want to use:
+DEFAULT_TORCH_DIR = '/idiap/home/aanjos/work/torch/v0.1-pre-numpy'
 
 def find_install_dir():
   """Test to see if I find my own libraries, otherwise, we are probably running
@@ -37,33 +37,31 @@ def find_install_dir():
 
   return os.path.realpath(install_dir)
 
-def find_torch_dir(install_dir):
-  """Does the best to find the torch installation directory"""
+def find_bob_dir(install_dir):
+  """Does the best to find the bob installation directory"""
    
   if os.environ.has_key('TORCH_DIR') and os.environ['TORCH_DIR'] and \
       os.path.exists(os.environ['TORCH_DIR']):
-    torch = os.environ['TORCH_DIR']
+    bob = os.environ['TORCH_DIR']
   else:
-    torch = DEFAULT_TORCH_DIR
+    bob = DEFAULT_TORCH_DIR
 
-  """
-  if not os.path.exists(torch): # in the faceveriflib directory?
-    torch = os.path.join(install_dir, 'torch')
+  if not os.path.exists(bob): # in the faceveriflib directory?
+    bob = os.path.join(install_dir, 'bob')
 
-  if not os.path.exists(torch): # at the same level?
-    torch = os.path.join(install_dir, '..', 'torch')
-  """
+  if not os.path.exists(bob): # at the same level?
+    bob = os.path.join(install_dir, '..', 'bob')
 
-  if not os.path.exists(torch):
-    raise RuntimeError, 'Cannot find a suitable torch5spro installation. The faceveriflib library requires torch5spro to run. You have 3 options: either set the environment variable TORCH_DIR to point to the "bin" directory inside the root of a torch installation, create a link from the faceveriflib installation directory or from one level up. The link has be called "torch".' 
+  if not os.path.exists(bob):
+    raise RuntimeError, 'Cannot find a suitable bob installation. The faceveriflib library requires bob to run. You have 3 options: either set the environment variable TORCH_DIR to point to the "bin" directory inside the root of a bob installation, create a link from the faceveriflib installation directory or from one level up. The link has be called "bob".' 
 
-  return os.path.realpath(torch)
+  return os.path.realpath(bob)
 
 # Locates base faceveriflib installation directory
 install_dir = find_install_dir()
-torch = find_torch_dir(install_dir)
+bob = find_bob_dir(install_dir)
 
-print "Using torch directory located here: %s." % torch
+print "Using bob directory located here: %s." % bob
 
 path = 'PATH'
 pypath = 'PYTHONPATH'
@@ -84,8 +82,8 @@ if new_environ.has_key(pypath) and new_environ[pypath]:
 else:
   new_environ[pypath] = lib_path
 
-# execute the torch shell setup
-shell = os.path.join(torch, 'bin', 'shell.py')
+# execute the bob shell setup
+shell = os.path.join(bob, 'bin', 'shell.py')
 arguments = [shell] + sys.argv[1:]
 #arguments = [shell, '-d'] + sys.argv[1:]
 

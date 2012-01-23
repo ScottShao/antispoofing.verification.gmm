@@ -24,10 +24,10 @@ FACEVERIFLIB_DIR = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0])
 GRIDTK_DIR = checked_directory(FACEVERIFLIB_DIR, 'gridtk')
 sys.path.insert(0, GRIDTK_DIR)
 
-# Defines the torch5spro installation root - by default we look at a fixed
+# Defines the bob installation root - by default we look at a fixed
 # location in the currently detected FACEVERIFLIB_DIR. You can change this and
 # hard-code whatever you prefer.
-TORCH_DIR = checked_directory(FACEVERIFLIB_DIR, 'torch')
+BOB_DIR = checked_directory(FACEVERIFLIB_DIR, 'bob')
 
 # This is a hard-coded number of array jobs we are targeting, for
 # parametric jobs.
@@ -38,10 +38,10 @@ TOTAL_REPLAY_CLIENTS = 50
 FACEVERIFLIB_WRAPPER = os.path.join(FACEVERIFLIB_DIR, 'shell.py')
 
 # The environment assures the correct execution of the wrapper and the correct
-# location of both the 'facevefilib' and 'torch' packages.
+# location of both the 'facevefilib' and 'bob' packages.
 FACEVERIFLIB_WRAPPER_ENVIRONMENT = [
     'FACEVERIFLIB_DIR=%s' % FACEVERIFLIB_DIR
-#    'TORCH_DIR=%s' % TORCH_DIR,
+#    'BOB_DIR=%s' % BOB_DIR,
     ]
 
 def submit(job_manager, command, dependencies=[], array=None, queue=None): 

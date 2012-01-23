@@ -3,7 +3,7 @@
 # Laurent El Shafey <Laurent.El-Shafey@idiap.ch>
 
 import os, sys
-import torch
+import bob
 import utils
 
 import argparse
@@ -27,7 +27,7 @@ def main():
   config = imp.load_source('config', args.config_file)
 
   # Database
-  db = torch.db.replay.Database()
+  db = bob.db.replay.Database()
 
   # Enrollment files
   process = db.files(cls="enroll")

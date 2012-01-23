@@ -4,15 +4,15 @@
 
 import os
 import utils
-import torch
-
+import bob
+import numpy
 
 def load_gmmstats(l_files):
   """Loads a dictionary of GMM statistics from a list of filenames"""
   gmmstats = [] 
   for k in l_files: 
     # Processes one file 
-    stats = torch.machine.GMMStats( torch.io.HDF5File(str(l_files[k])) ) 
+    stats = bob.machine.GMMStats( bob.io.HDF5File(str(l_files[k])) ) 
     # Appends in the list 
     gmmstats.append(stats)
   return gmmstats
@@ -47,18 +47,18 @@ def jfa_train_base(train_files, jfabase_filename, ubm_filename,
     print "Training JFABase model"
     if not os.path.exists(ubm_filename):
       raise RuntimeError, "Cannot find UBM %s" % (ubm_filename)
-    ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))
+    ubm = bob.machine.GMMMachine(bob.io.HDF5File(ubm_filename))
 
-    jfabase = torch.machine.JFABaseMachine(ubm, ru, rv)
+    jfabase = bob.machine.JFABaseMachine(ubm, ru, rv)
     jfabase.ubm = ubm
 
     gmmstats = load_gmmstats_train(train_files)
 
-    T = torch.trainer.JFABaseTrainer(jfabase)
+    T = bob.trainer.JFABaseTrainer(jfabase)
     T.train(gmmstats, n_iter_train)
 
     # Save the JFA base to file
-    jfabase.save(torch.io.HDF5File(jfabase_filename))
+    jfabase.save(bob.io.HDF5File(jfabase_filename))
 
 
 def isv_train_base(train_files, isvbase_filename, ubm_filename,
@@ -76,18 +76,18 @@ def isv_train_base(train_files, isvbase_filename, ubm_filename,
     print "Training ISV Base model"
     if not os.path.exists(ubm_filename):
       raise RuntimeError, "Cannot find UBM %s" % (ubm_filename)
-    ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))
+    ubm = bob.machine.GMMMachine(bob.io.HDF5File(ubm_filename))
 
-    isvbase = torch.machine.JFABaseMachine(ubm, ru, 1)
+    isvbase = bob.machine.JFABaseMachine(ubm, ru, 1)
     isvbase.ubm = ubm
 
     gmmstats = load_gmmstats_train(train_files)
 
-    T = torch.trainer.JFABaseTrainer(isvbase)
+    T = bob.trainer.JFABaseTrainer(isvbase)
     T.trainISV(gmmstats, n_iter_train, relevance_factor)
 
     # Save the ISV base to file
-    isvbase.save(torch.io.HDF5File(isvbase_filename))
+    isvbase.save(bob.io.HDF5File(isvbase_filename))
 
 
 #def gmm_stats(features_input, ubm_filename, gmmstats_output, force=False):
@@ -96,10 +96,10 @@ def isv_train_base(train_files, isvbase_filename, ubm_filename,
   # Loads the UBM 
   if not os.path.exists(ubm_filename):
     raise RuntimeError, "Cannot find UBM %s" % (ubm_filename)
-  ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))    
+  ubm = bob.machine.GMMMachine(bob.io.HDF5File(ubm_filename))    
 
   # Initializes GMMStats object 
-  gmmstats = torch.machine.GMMStats(ubm.nGaussians, ubm.nInputs)
+  gmmstats = bob.machine.GMMStats(ubm.nGaussians, ubm.nInputs)
 
   # Processes the 'dictionary of files'
   for k in features_input:
@@ -113,13 +113,13 @@ def isv_train_base(train_files, isvbase_filename, ubm_filename,
     else:
       print "Computing statistics from features %s." % (features_input[k])
       # Loads input features file
-      features = torch.io.Arrayset( str(features_input[k]) )
+      features = bob.io.Arrayset( str(features_input[k]) )
       # Accumulates statistics
       gmmstats.init()
       ubm.accStatistics(features, gmmstats)
       # Saves the statistics
       utils.ensure_dir(os.path.dirname( str(gmmstats_output[k]) ))
-      gmmstats.save(torch.io.HDF5File( str(gmmstats_output[k]) ))
+      gmmstats.save(bob.io.HDF5File( str(gmmstats_output[k]) ))
 """
 
 def jfa_enrol_model(enrol_files, model_path, jfabase_filename, ubm_filename, n_iter_enrol=1, force=False):
@@ -140,20 +140,20 @@ def jfa_enrol_model(enrol_files, model_path, jfabase_filename, ubm_filename, n_i
     # Loads the UBM and JFA base 
     if not os.path.exists(ubm_filename):
         raise RuntimeError, "Cannot find UBM %s" % (ubm_filename)
-    ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))
+    ubm = bob.machine.GMMMachine(bob.io.HDF5File(ubm_filename))
     if not os.path.exists(jfabase_filename):
         raise RuntimeError, "Cannot find JFA Base %s" % (jfabase_filename)
-    jfabase = torch.machine.JFABaseMachine(torch.io.HDF5File(jfabase_filename))
+    jfabase = bob.machine.JFABaseMachine(bob.io.HDF5File(jfabase_filename))
     jfabase.ubm = ubm
 
     # Enrols
-    machine = torch.machine.JFAMachine(jfabase)
-    base_trainer = torch.trainer.JFABaseTrainer(jfabase)
-    trainer = torch.trainer.JFATrainer(machine, base_trainer)
+    machine = bob.machine.JFAMachine(jfabase)
+    base_trainer = bob.trainer.JFABaseTrainer(jfabase)
+    trainer = bob.trainer.JFATrainer(machine, base_trainer)
     trainer.enrol(gmmstats, n_iter_enrol)
 
     # Saves it to the given file
-    machine.save(torch.io.HDF5File(model_path))
+    machine.save(bob.io.HDF5File(model_path))
 
 
 def jfa_scores_A(models_ids, models_dir, probe_files, jfabase_filename, ubm_filename, db,
@@ -163,12 +163,12 @@ def jfa_scores_A(models_ids, models_dir, probe_files, jfabase_filename, ubm_file
   # Loads the UBM 
   if not os.path.exists(ubm_filename):
       raise RuntimeError, "Cannot find UBM %s" % (ubm_filename) 
-  ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))    
+  ubm = bob.machine.GMMMachine(bob.io.HDF5File(ubm_filename))    
 
   # Loads the JFA base
   if not os.path.exists(jfabase_filename):
       raise RuntimeError, "Cannot find JFA Base %s" % (jfabase_filename) 
-  jfabase = torch.machine.JFABaseMachine(torch.io.HDF5File(jfabase_filename))
+  jfabase = bob.machine.JFABaseMachine(bob.io.HDF5File(jfabase_filename))
   jfabase.ubm = ubm
 
   # Gets the probe samples (as well as their corresponding client ids)
@@ -177,7 +177,7 @@ def jfa_scores_A(models_ids, models_dir, probe_files, jfabase_filename, ubm_file
   for k in sorted(probe_files.keys()):
     if not os.path.exists(str(probe_files[k][0])):
       raise RuntimeError, "Cannot find GMM statistics %s for this Z-Norm sample." % (probe_files[k][0])
-    stats = torch.machine.GMMStats(torch.io.HDF5File(str(probe_files[k][0])))
+    stats = bob.machine.GMMStats(bob.io.HDF5File(str(probe_files[k][0])))
     probe_tests.append(stats)
     probe_clients_ids.append(probe_files[k][3])
 
@@ -188,18 +188,18 @@ def jfa_scores_A(models_ids, models_dir, probe_files, jfabase_filename, ubm_file
     model_path = os.path.join(models_dir, str(model_id) + ".hdf5")
     if not os.path.exists(model_path):
       raise RuntimeError, "Could not find model %s." % model_path
-    machine = torch.machine.JFAMachine(torch.io.HDF5File(model_path))
+    machine = bob.machine.JFAMachine(bob.io.HDF5File(model_path))
     machine.jfa_base = jfabase
     clients_ids = [db.getClientIdFromModelId(model_id)]
 
     # Saves the A row vector for each model and Z-Norm samples split
-    #A1 = torch.core.array.float64_1((len(probe_tests,)))
+    #A1 = numpy.ndarray((len(probe_tests,), 'float64'))
     #machine.forward(probe_tests, A1)
-    A = torch.core.array.float64_2((1,len(probe_tests)))
+    A = numpy.ndarray((1,len(probe_tests)), 'float64')
     for i in range(len(probe_tests)):
       A[0,i] = machine.forward(probe_tests[i])
     #A[0,:] = A1[:]
-    torch.io.Array(A).save(os.path.join(zt_norm_A_dir, group, str(model_id) + "_" + str(probes_split_id).zfill(4) + ".hdf5"))
+    bob.io.Array(A).save(os.path.join(zt_norm_A_dir, group, str(model_id) + "_" + str(probes_split_id).zfill(4) + ".hdf5"))
 
     # Saves to text file
     import utils
@@ -218,12 +218,12 @@ def jfa_ztnorm_B(models_ids, models_dir, zfiles, jfabase_filename, ubm_filename,
   # Loads the UBM 
   if not os.path.exists(ubm_filename):
       raise RuntimeError, "Cannot find UBM %s" % (ubm_filename) 
-  ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))    
+  ubm = bob.machine.GMMMachine(bob.io.HDF5File(ubm_filename))    
 
   # Loads the JFA base
   if not os.path.exists(jfabase_filename):
       raise RuntimeError, "Cannot find JFA Base %s" % (jfabase_filename) 
-  jfabase = torch.machine.JFABaseMachine(torch.io.HDF5File(jfabase_filename))
+  jfabase = bob.machine.JFABaseMachine(bob.io.HDF5File(jfabase_filename))
   jfabase.ubm = ubm
 
   # Gets the Z-Norm impostor samples (as well as their corresponding client ids)
@@ -232,7 +232,7 @@ def jfa_ztnorm_B(models_ids, models_dir, zfiles, jfabase_filename, ubm_filename,
   for k in sorted(zfiles.keys()):
     if not os.path.exists(str(zfiles[k][0])):
       raise RuntimeError, "Cannot find GMM statistics %s for this Z-Norm sample." % (zfiles[k][0])
-    stats = torch.machine.GMMStats(torch.io.HDF5File(str(zfiles[k][0])))
+    stats = bob.machine.GMMStats(bob.io.HDF5File(str(zfiles[k][0])))
     znorm_tests.append(stats)
     znorm_clients_ids.append(zfiles[k][3])
 
@@ -243,16 +243,16 @@ def jfa_ztnorm_B(models_ids, models_dir, zfiles, jfabase_filename, ubm_filename,
     model_path = os.path.join(models_dir, str(model_id) + ".hdf5")
     if not os.path.exists(model_path):
       raise RuntimeError, "Could not find model %s." % model_path
-    machine = torch.machine.JFAMachine(torch.io.HDF5File(model_path))
+    machine = bob.machine.JFAMachine(bob.io.HDF5File(model_path))
     machine.jfa_base = jfabase
 
     # Save the B row vector for each model and Z-Norm samples split
-    B = torch.core.array.float64_2((1,len(znorm_tests)))
+    B = numpy.ndarray((1,len(znorm_tests)), 'float64')
     for i in range(len(znorm_tests)):
       B[0,i] = machine.forward(znorm_tests[i])
-    #B = torch.core.array.float64_2((1,len(znorm_tests)))
+    #B = numpy.ndarray((1,len(znorm_tests)), 'float64')
     #machine.forward(znorm_tests, B[0,:]) 
-    torch.io.Array(B).save(os.path.join(zt_norm_B_dir, group, str(model_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))
+    bob.io.Array(B).save(os.path.join(zt_norm_B_dir, group, str(model_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))
 
 
 def jfa_ztnorm_C(tmodel_id, tnorm_models_dir, probe_files, jfabase_filename, ubm_filename, db,
@@ -262,12 +262,12 @@ def jfa_ztnorm_C(tmodel_id, tnorm_models_dir, probe_files, jfabase_filename, ubm
   # Loads the UBM 
   if not os.path.exists(ubm_filename):
       raise RuntimeError, "Cannot find UBM %s" % (ubm_filename) 
-  ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))    
+  ubm = bob.machine.GMMMachine(bob.io.HDF5File(ubm_filename))    
 
   # Loads the JFA base
   if not os.path.exists(jfabase_filename):
       raise RuntimeError, "Cannot find JFA Base %s" % (jfabase_filename) 
-  jfabase = torch.machine.JFABaseMachine(torch.io.HDF5File(jfabase_filename))
+  jfabase = bob.machine.JFABaseMachine(bob.io.HDF5File(jfabase_filename))
   jfabase.ubm = ubm
 
   # Gets the probe samples (as well as their corresponding client ids)
@@ -276,23 +276,23 @@ def jfa_ztnorm_C(tmodel_id, tnorm_models_dir, probe_files, jfabase_filename, ubm
   for k in sorted(probe_files.keys()):
     if not os.path.exists(str(probe_files[k])):
       raise RuntimeError, "Cannot find GMM statistics %s for this sample." % (probe_files[k])
-    stats = torch.machine.GMMStats(torch.io.HDF5File(str(probe_files[k])))
+    stats = bob.machine.GMMStats(bob.io.HDF5File(str(probe_files[k])))
     probe_tests.append(stats)
 
   # Loads the T-norm model
   tmodel_path = os.path.join(tnorm_models_dir, str(tmodel_id) + ".hdf5")
   if not os.path.exists(tmodel_path):
     raise RuntimeError, "Could not find T-Norm model %s." % tmodel_path
-  tmachine = torch.machine.JFAMachine(torch.io.HDF5File(tmodel_path))
+  tmachine = bob.machine.JFAMachine(bob.io.HDF5File(tmodel_path))
   tmachine.jfa_base = jfabase
 
   # Saves the C row vector for each T-Norm model and samples split
-  C = torch.core.array.float64_2((1,len(probe_tests)))
+  C = numpy.ndarray((1,len(probe_tests)), 'float64')
   for i in range(len(probe_tests)):
     C[0,i] = tmachine.forward(probe_tests[i])
-  #C = torch.core.array.float64_2((1,len(probe_tests)))
+  #C = numpy.ndarray((1,len(probe_tests)), 'float64')
   #tmachine.forward(probe_tests, C[0,:]) 
-  torch.io.Array(C).save(os.path.join(zt_norm_C_dir, group, "TM" + str(tmodel_id) + "_" + str(probes_split_id).zfill(4) + ".hdf5"))
+  bob.io.Array(C).save(os.path.join(zt_norm_C_dir, group, "TM" + str(tmodel_id) + "_" + str(probes_split_id).zfill(4) + ".hdf5"))
 
 
 def jfa_ztnorm_D(tnorm_models_ids, tnorm_models_dir, zfiles, jfabase_filename, ubm_filename, db,
@@ -302,12 +302,12 @@ def jfa_ztnorm_D(tnorm_models_ids, tnorm_models_dir, zfiles, jfabase_filename, u
   # Loads the UBM 
   if not os.path.exists(ubm_filename):
       raise RuntimeError, "Cannot find UBM %s" % (ubm_filename) 
-  ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))    
+  ubm = bob.machine.GMMMachine(bob.io.HDF5File(ubm_filename))    
 
   # Loads the JFA base
   if not os.path.exists(jfabase_filename):
       raise RuntimeError, "Cannot find JFA Base %s" % (jfabase_filename) 
-  jfabase = torch.machine.JFABaseMachine(torch.io.HDF5File(jfabase_filename))
+  jfabase = bob.machine.JFABaseMachine(bob.io.HDF5File(jfabase_filename))
   jfabase.ubm = ubm
 
   # Gets the Z-Norm impostor samples (as well as their corresponding client ids)
@@ -316,7 +316,7 @@ def jfa_ztnorm_D(tnorm_models_ids, tnorm_models_dir, zfiles, jfabase_filename, u
   for k in sorted(zfiles.keys()):
     if not os.path.exists(str(zfiles[k][0])):
       raise RuntimeError, "Cannot find GMM statistics %s for this Z-Norm sample." % (zfiles[k][0])
-    stats = torch.machine.GMMStats(torch.io.HDF5File(str(zfiles[k][0])))
+    stats = bob.machine.GMMStats(bob.io.HDF5File(str(zfiles[k][0])))
     znorm_tests.append(stats)
     znorm_clients_ids.append(zfiles[k][3])
 
@@ -327,16 +327,16 @@ def jfa_ztnorm_D(tnorm_models_ids, tnorm_models_dir, zfiles, jfabase_filename, u
     tmodel_path = os.path.join(tnorm_models_dir, str(tmodel_id) + ".hdf5")
     if not os.path.exists(tmodel_path):
       raise RuntimeError, "Could not find T-Norm model %s." % tmodel_path
-    tmachine = torch.machine.JFAMachine(torch.io.HDF5File(tmodel_path))
+    tmachine = bob.machine.JFAMachine(bob.io.HDF5File(tmodel_path))
     tmachine.jfa_base = jfabase
     tnorm_clients_ids = [db.getClientIdFromModelId(tmodel_id)]
 
     # Save the D and D_sameValue row vector for each T-Norm model and Z-Norm samples split
-    D_tm = torch.core.array.float64_2((1,len(znorm_tests)))
+    D_tm = numpy.ndarray((1,len(znorm_tests)), 'float64')
     for i in range(len(znorm_tests)):
       D_tm[0,i] = tmachine.forward(znorm_tests[i])
-    #D_tm = torch.core.array.float64_2((1,len(znorm_tests)))
+    #D_tm = numpy.ndarray((1,len(znorm_tests)), 'float64')
     #tmachine.forward(znorm_tests, D_tm[0,:]) 
-    torch.io.Array(D_tm).save(os.path.join(zt_norm_D_dir, group, str(tmodel_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))
-    D_sameValue_tm = torch.machine.ztnormSameValue(tnorm_clients_ids, znorm_clients_ids)
-    torch.io.Array(D_sameValue_tm).save(os.path.join(zt_norm_D_sameValue_dir, group, str(tmodel_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))
+    bob.io.Array(D_tm).save(os.path.join(zt_norm_D_dir, group, str(tmodel_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))
+    D_sameValue_tm = bob.machine.ztnormSameValue(tnorm_clients_ids, znorm_clients_ids)
+    bob.io.Array(D_sameValue_tm).save(os.path.join(zt_norm_D_sameValue_dir, group, str(tmodel_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))

@@ -3,7 +3,7 @@
 # Laurent El Shafey <Laurent.El-Shafey@idiap.ch>
 
 import os, math
-import torch
+import bob
 import utils
 
 import argparse
@@ -25,7 +25,7 @@ def main():
   config = imp.load_source('config', args.config_file)
 
   # Database
-  db = torch.db.replay.Database()
+  db = bob.db.replay.Database()
 
   # Run for attacks and real-accesses for the development and test groups
   process = db.files(cls=('attack','real'), groups=('devel', 'test'))

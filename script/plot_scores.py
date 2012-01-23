@@ -9,7 +9,7 @@
 import os
 import sys
 import matplotlib.pyplot as mpl
-import torch
+import bob
 import argparse
 
 def main():
@@ -32,8 +32,8 @@ def main():
   if not args.protocol: 
     args.protocol = os.path.splitext(os.path.basename(args.overlay))[0]
 
-  [base_neg, base_pos] = torch.measure.load.split_four_column(args.baseline)
-  [over_neg, over_pos] = torch.measure.load.split_four_column(args.overlay)
+  [base_neg, base_pos] = bob.measure.load.split_four_column(args.baseline)
+  [over_neg, over_pos] = bob.measure.load.split_four_column(args.overlay)
 
   mpl.hist(base_neg, bins=10, color='red', alpha=0.5, label="Impostors",
       normed=True)

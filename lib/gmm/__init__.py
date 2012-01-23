@@ -4,13 +4,14 @@
 
 import os
 import utils
-import torch
+import numpy
+import bob
 
 def load_data(files):
   """Concatenates a list of blitz arrays into an Arrayset"""
-  data = torch.io.Arrayset()
+  data = bob.io.Arrayset()
   for f in files:
-    data.extend(torch.io.Array(str(f)))
+    data.extend(bob.io.Array(str(f)))
   return data
 
 
@@ -22,15 +23,15 @@ def NormalizeStdArrayset(arrayset):
   # Initializes variables
   length = arrayset.shape[0]
   n_samples = len(arrayset)
-  mean = torch.core.array.float64_1(length)
-  std = torch.core.array.float64_1(length)
+  mean = numpy.ndarray((length,), 'float64')
+  std = numpy.ndarray((length,), 'float64')
 
   mean.fill(0)
   std.fill(0)
 
   # Computes mean and variance
   for array in arrayset:
-    x = array.get().cast('float64')
+    x = array.get().astype('float64')
     mean += x
     std += (x ** 2)
 
@@ -39,9 +40,9 @@ def NormalizeStdArrayset(arrayset):
   std -= (mean ** 2)
   std = std ** 0.5 # sqrt(std)
 
-  arStd = torch.io.Arrayset()
+  arStd = bob.io.Arrayset()
   for array in arrayset:
-    arStd.append(array.get().cast('float64') / std)
+    arStd.append(array.get().astype('float64') / std)
 
   return (arStd,std)
 
@@ -70,14 +71,14 @@ def gmm_train_UBM(train_files, ubm_filename,
   else:
     (normalizedAr,stdAr) = NormalizeStdArrayset(ar)
 
-  #torch.io.Array(stdAr).save("/idiap/home/lelshafey/Desktop/STD_ARR.hdf5")
+  #bob.io.Array(stdAr).save("/idiap/home/lelshafey/Desktop/STD_ARR.hdf5")
 
   # Creates the machines (KMeans and GMM)
-  kmeans = torch.machine.KMeansMachine(n_gaussians, input_size)
-  gmm = torch.machine.GMMMachine(n_gaussians, input_size)
+  kmeans = bob.machine.KMeansMachine(n_gaussians, input_size)
+  gmm = bob.machine.GMMMachine(n_gaussians, input_size)
 
   # Creates the KMeansTrainer
-  kmeansTrainer = torch.trainer.KMeansTrainer()
+  kmeansTrainer = bob.trainer.KMeansTrainer()
   kmeansTrainer.convergenceThreshold = convergence_threshold
   kmeansTrainer.maxIterations = iterk
 
@@ -86,9 +87,9 @@ def gmm_train_UBM(train_files, ubm_filename,
 
   [variances, weights] = kmeans.getVariancesAndWeightsForEachCluster(normalizedAr)
   means = kmeans.means
-  #torch.io.Array(means).save("/idiap/home/lelshafey/Desktop/KMEANS_AFTER_means.hdf5")
-  #torch.io.Array(variances).save("/idiap/home/lelshafey/Desktop/KMEANS_AFTER_variances.hdf5")
-  #torch.io.Array(weights).save("/idiap/home/lelshafey/Desktop/KMEANS_AFTER_weights.hdf5")
+  #bob.io.Array(means).save("/idiap/home/lelshafey/Desktop/KMEANS_AFTER_means.hdf5")
+  #bob.io.Array(variances).save("/idiap/home/lelshafey/Desktop/KMEANS_AFTER_variances.hdf5")
+  #bob.io.Array(weights).save("/idiap/home/lelshafey/Desktop/KMEANS_AFTER_weights.hdf5")
 
   # Undoes the normalization
   if norm_KMeans:
@@ -101,16 +102,16 @@ def gmm_train_UBM(train_files, ubm_filename,
   gmm.weights = weights
   gmm.setVarianceThresholds(variance_threshold)
 
-  #gmm.save(torch.io.HDF5File("/idiap/home/lelshafey/Desktop/UBM_AFTER_KMEANS.hdf5"))
+  #gmm.save(bob.io.HDF5File("/idiap/home/lelshafey/Desktop/UBM_AFTER_KMEANS.hdf5"))
 
   # Trains the GMM
-  trainer = torch.trainer.ML_GMMTrainer(update_means, update_variances, update_weights)
+  trainer = bob.trainer.ML_GMMTrainer(update_means, update_variances, update_weights)
   trainer.convergenceThreshold = convergence_threshold
   trainer.maxIterations = iterg
   trainer.train(gmm, ar)
 
   # Saves the UBM to file
-  gmm.save(torch.io.HDF5File(ubm_filename))
+  gmm.save(bob.io.HDF5File(ubm_filename))
 
 
 def gmm_stats(features_input, ubm_filename, gmmstats_output, force=False):
@@ -118,10 +119,10 @@ def gmm_stats(features_input, ubm_filename, gmmstats_output, force=False):
   # Loads the UBM 
   if not os.path.exists(ubm_filename):
     RuntimeError, "Cannot find UBM %s" % (ubm_filename)
-  ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))    
+  ubm = bob.machine.GMMMachine(bob.io.HDF5File(ubm_filename))    
 
   # Initializes GMMStats object 
-  gmmstats = torch.machine.GMMStats(ubm.nGaussians, ubm.nInputs)
+  gmmstats = bob.machine.GMMStats(ubm.nGaussians, ubm.nInputs)
 
   # Processes the 'dictionary of files'
   for k in features_input:
@@ -139,7 +140,7 @@ def gmm_stats(features_input, ubm_filename, gmmstats_output, force=False):
     else:
       print "Computing statistics from features %s." % (features_input[k])
       # Loads input features file
-      features = torch.io.Arrayset( str(features_input[k]) )
+      features = bob.io.Arrayset( str(features_input[k]) )
       # Accumulates statistics
       gmmstats.init()
       try:
@@ -150,7 +151,7 @@ def gmm_stats(features_input, ubm_filename, gmmstats_output, force=False):
 
       # Saves the statistics
       utils.ensure_dir(os.path.dirname( str(gmmstats_output[k]) ))
-      gmmstats.save(torch.io.HDF5File( str(gmmstats_output[k]) ))
+      gmmstats.save(bob.io.HDF5File( str(gmmstats_output[k]) ))
 
 
 def gmm_enrol_model(enrol_files, model_path, ubm_filename,
@@ -163,14 +164,14 @@ def gmm_enrol_model(enrol_files, model_path, ubm_filename,
   # Loads the UBM/prior gmm
   if not os.path.exists(ubm_filename):
       raise RuntimeError, "Cannot find UBM %s" % (ubm_filename)
-  ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))    
+  ubm = bob.machine.GMMMachine(bob.io.HDF5File(ubm_filename))    
   ubm.setVarianceThresholds(variance_threshold)
 
   # Creates the trainer
   if responsibilities_threshold == 0.:
-    trainer = torch.trainer.MAP_GMMTrainer(relevance_factor, True, adapt_variance, adapt_weight)
+    trainer = bob.trainer.MAP_GMMTrainer(relevance_factor, True, adapt_variance, adapt_weight)
   else:
-    trainer = torch.trainer.MAP_GMMTrainer(relevance_factor, True, adapt_variance, adapt_weight, responsibilities_threshold)
+    trainer = bob.trainer.MAP_GMMTrainer(relevance_factor, True, adapt_variance, adapt_weight, responsibilities_threshold)
   trainer.convergenceThreshold = convergence_threshold
   trainer.maxIterations = iterg
   trainer.setPriorGMM(ubm)
@@ -179,14 +180,14 @@ def gmm_enrol_model(enrol_files, model_path, ubm_filename,
     trainer.setT3MAP(alpha_torch3)
 
   # Creates a GMM from the UBM
-  gmm = torch.machine.GMMMachine(ubm)
+  gmm = bob.machine.GMMMachine(ubm)
   gmm.setVarianceThresholds(variance_threshold)
 
   # Trains the GMM
   trainer.train(gmm, ar)
 
   # Saves it to the given file
-  gmm.save(torch.io.HDF5File(model_path))
+  gmm.save(bob.io.HDF5File(model_path))
 
 def gmm_scores_replay(model_filename, probe_file, probe_output, ubm_filename):
   """Computes a split of the A matrix for the ZT-Norm and saves the raw scores to file"""
@@ -194,19 +195,19 @@ def gmm_scores_replay(model_filename, probe_file, probe_output, ubm_filename):
   # Loads the UBM 
   if not os.path.exists(ubm_filename):
       raise RuntimeError, "Cannot find UBM %s" % (ubm_filename)
-  ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))
+  ubm = bob.machine.GMMMachine(bob.io.HDF5File(ubm_filename))
 
   # Loads the models
   model = []
   if not os.path.exists(model_filename):
     raise RuntimeError, "Could not find model %s." % model_filename
-  model = [torch.machine.GMMMachine(torch.io.HDF5File(model_filename))]
+  model = [bob.machine.GMMMachine(bob.io.HDF5File(model_filename))]
 
   # For every probe, run an individual test
   for k,v in enumerate(probe_file):
-    stats = [torch.machine.GMMStats(torch.io.HDF5File(str(v)))]
+    stats = [bob.machine.GMMStats(bob.io.HDF5File(str(v)))]
     # Saves the A row vector for each model and Z-Norm samples split
-    A = torch.machine.linearScoring(model, ubm, stats, None, True)
+    A = bob.machine.linearScoring(model, ubm, stats, None, True)
     utils.ensure_dir(os.path.dirname(probe_output[k]))
     A.save(probe_output[k])
     print "Processed (%d/%d)\n  %s\n  %s" % (k+1, len(probe_file), v, probe_output[k])
@@ -218,7 +219,7 @@ def gmm_scores_A(models_ids, models_dir, probe_files, ubm_filename, db,
   # Loads the UBM 
   if not os.path.exists(ubm_filename):
       raise RuntimeError, "Cannot find UBM %s" % (ubm_filename) 
-  ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))    
+  ubm = bob.machine.GMMMachine(bob.io.HDF5File(ubm_filename))    
 
   # Gets the probe samples (as well as their corresponding client ids)
   probe_tests = []
@@ -226,7 +227,7 @@ def gmm_scores_A(models_ids, models_dir, probe_files, ubm_filename, db,
   for k in sorted(probe_files.keys()):
     if not os.path.exists(str(probe_files[k][0])):
       raise RuntimeError, "Cannot find GMM statistics %s for this Z-Norm sample." % (probe_files[k][0])
-    stats = torch.machine.GMMStats(torch.io.HDF5File(str(probe_files[k][0])))
+    stats = bob.machine.GMMStats(bob.io.HDF5File(str(probe_files[k][0])))
     probe_tests.append(stats)
     probe_clients_ids.append(probe_files[k][3])
 
@@ -237,12 +238,12 @@ def gmm_scores_A(models_ids, models_dir, probe_files, ubm_filename, db,
     model_path = os.path.join(models_dir, str(model_id) + ".hdf5")
     if not os.path.exists(model_path):
       raise RuntimeError, "Could not find model %s." % model_path
-    models = [torch.machine.GMMMachine(torch.io.HDF5File(model_path))]
+    models = [bob.machine.GMMMachine(bob.io.HDF5File(model_path))]
     clients_ids = [db.getClientIdFromModelId(model_id)]
 
     # Saves the A row vector for each model and Z-Norm samples split
-    A = torch.machine.linearScoring(models, ubm, probe_tests)
-    torch.io.Array(A).save(os.path.join(zt_norm_A_dir, group, str(model_id) + "_" + str(probes_split_id).zfill(4) + ".hdf5"))
+    A = bob.machine.linearScoring(models, ubm, probe_tests)
+    bob.io.Array(A).save(os.path.join(zt_norm_A_dir, group, str(model_id) + "_" + str(probes_split_id).zfill(4) + ".hdf5"))
 
     # Saves to text file
     import utils
@@ -261,7 +262,7 @@ def gmm_ztnorm_B(models_ids, models_dir, zfiles, ubm_filename, db,
   # Loads the UBM 
   if not os.path.exists(ubm_filename):
       raise RuntimeError, "Cannot find UBM %s" % (ubm_filename) 
-  ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))    
+  ubm = bob.machine.GMMMachine(bob.io.HDF5File(ubm_filename))    
 
   # Gets the Z-Norm impostor samples (as well as their corresponding client ids)
   znorm_tests = []
@@ -269,7 +270,7 @@ def gmm_ztnorm_B(models_ids, models_dir, zfiles, ubm_filename, db,
   for k in sorted(zfiles.keys()):
     if not os.path.exists(str(zfiles[k][0])):
       raise RuntimeError, "Cannot find GMM statistics %s for this Z-Norm sample." % (zfiles[k][0])
-    stats = torch.machine.GMMStats(torch.io.HDF5File(str(zfiles[k][0])))
+    stats = bob.machine.GMMStats(bob.io.HDF5File(str(zfiles[k][0])))
     znorm_tests.append(stats)
     znorm_clients_ids.append(zfiles[k][3])
 
@@ -280,11 +281,11 @@ def gmm_ztnorm_B(models_ids, models_dir, zfiles, ubm_filename, db,
     model_path = os.path.join(models_dir, str(model_id) + ".hdf5")
     if not os.path.exists(model_path):
       raise RuntimeError, "Could not find model %s." % model_path
-    models = [torch.machine.GMMMachine(torch.io.HDF5File(model_path))]
+    models = [bob.machine.GMMMachine(bob.io.HDF5File(model_path))]
 
     # Save the B row vector for each model and Z-Norm samples split
-    B = torch.machine.linearScoring(models, ubm, znorm_tests)
-    torch.io.Array(B).save(os.path.join(zt_norm_B_dir, group, str(model_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))
+    B = bob.machine.linearScoring(models, ubm, znorm_tests)
+    bob.io.Array(B).save(os.path.join(zt_norm_B_dir, group, str(model_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))
 
 
 def gmm_ztnorm_C(tmodel_id, tnorm_models_dir, probe_files, ubm_filename, db,
@@ -294,7 +295,7 @@ def gmm_ztnorm_C(tmodel_id, tnorm_models_dir, probe_files, ubm_filename, db,
   # Loads the UBM 
   if not os.path.exists(ubm_filename):
       raise RuntimeError, "Cannot find UBM %s" % (ubm_filename) 
-  ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))    
+  ubm = bob.machine.GMMMachine(bob.io.HDF5File(ubm_filename))    
 
   # Gets the probe samples (as well as their corresponding client ids)
   probe_tests = []
@@ -302,18 +303,18 @@ def gmm_ztnorm_C(tmodel_id, tnorm_models_dir, probe_files, ubm_filename, db,
   for k in sorted(probe_files.keys()):
     if not os.path.exists(str(probe_files[k])):
       raise RuntimeError, "Cannot find GMM statistics %s for this sample." % (probe_files[k])
-    stats = torch.machine.GMMStats(torch.io.HDF5File(str(probe_files[k])))
+    stats = bob.machine.GMMStats(bob.io.HDF5File(str(probe_files[k])))
     probe_tests.append(stats)
 
   # Loads the T-norm model
   tmodel_path = os.path.join(tnorm_models_dir, str(tmodel_id) + ".hdf5")
   if not os.path.exists(tmodel_path):
     raise RuntimeError, "Could not find T-Norm model %s." % tmodel_path
-  tmodels = [torch.machine.GMMMachine(torch.io.HDF5File(tmodel_path))]
+  tmodels = [bob.machine.GMMMachine(bob.io.HDF5File(tmodel_path))]
 
   # Saves the C row vector for each T-Norm model and samples split
-  C = torch.machine.linearScoring(tmodels, ubm, probe_tests)
-  torch.io.Array(C).save(os.path.join(zt_norm_C_dir, group, "TM" + str(tmodel_id) + "_" + str(probes_split_id).zfill(4) + ".hdf5"))
+  C = bob.machine.linearScoring(tmodels, ubm, probe_tests)
+  bob.io.Array(C).save(os.path.join(zt_norm_C_dir, group, "TM" + str(tmodel_id) + "_" + str(probes_split_id).zfill(4) + ".hdf5"))
 
 
 def gmm_ztnorm_D(tnorm_models_ids, tnorm_models_dir, zfiles, ubm_filename, db,
@@ -323,7 +324,7 @@ def gmm_ztnorm_D(tnorm_models_ids, tnorm_models_dir, zfiles, ubm_filename, db,
   # Loads the UBM 
   if not os.path.exists(ubm_filename):
       raise RuntimeError, "Cannot find UBM %s" % (ubm_filename) 
-  ubm = torch.machine.GMMMachine(torch.io.HDF5File(ubm_filename))    
+  ubm = bob.machine.GMMMachine(bob.io.HDF5File(ubm_filename))    
 
   # Gets the Z-Norm impostor samples (as well as their corresponding client ids)
   znorm_tests = []
@@ -331,7 +332,7 @@ def gmm_ztnorm_D(tnorm_models_ids, tnorm_models_dir, zfiles, ubm_filename, db,
   for k in sorted(zfiles.keys()):
     if not os.path.exists(str(zfiles[k][0])):
       raise RuntimeError, "Cannot find GMM statistics %s for this Z-Norm sample." % (zfiles[k][0])
-    stats = torch.machine.GMMStats(torch.io.HDF5File(str(zfiles[k][0])))
+    stats = bob.machine.GMMStats(bob.io.HDF5File(str(zfiles[k][0])))
     znorm_tests.append(stats)
     znorm_clients_ids.append(zfiles[k][3])
 
@@ -342,11 +343,11 @@ def gmm_ztnorm_D(tnorm_models_ids, tnorm_models_dir, zfiles, ubm_filename, db,
     tmodel_path = os.path.join(tnorm_models_dir, str(tmodel_id) + ".hdf5")
     if not os.path.exists(tmodel_path):
       raise RuntimeError, "Could not find T-Norm model %s." % tmodel_path
-    tnorm_models = [torch.machine.GMMMachine(torch.io.HDF5File(tmodel_path))]
+    tnorm_models = [bob.machine.GMMMachine(bob.io.HDF5File(tmodel_path))]
     tnorm_clients_ids = [db.getClientIdFromModelId(tmodel_id)]
 
     # Save the D and D_sameValue row vector for each T-Norm model and Z-Norm samples split
-    D_tm = torch.machine.linearScoring(tnorm_models, ubm, znorm_tests)
-    torch.io.Array(D_tm).save(os.path.join(zt_norm_D_dir, group, str(tmodel_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))
-    D_sameValue_tm = torch.machine.ztnormSameValue(tnorm_clients_ids, znorm_clients_ids)
-    torch.io.Array(D_sameValue_tm).save(os.path.join(zt_norm_D_sameValue_dir, group, str(tmodel_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))
+    D_tm = bob.machine.linearScoring(tnorm_models, ubm, znorm_tests)
+    bob.io.Array(D_tm).save(os.path.join(zt_norm_D_dir, group, str(tmodel_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))
+    D_sameValue_tm = bob.machine.ztnormSameValue(tnorm_clients_ids, znorm_clients_ids)
+    bob.io.Array(D_sameValue_tm).save(os.path.join(zt_norm_D_sameValue_dir, group, str(tmodel_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))

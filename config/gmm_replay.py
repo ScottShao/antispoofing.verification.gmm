@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
 import os
-import torch
 
-# 0/ The database to use
-#base_output_dir = "results"
-base_output_dir = "/idiap/temp/aanjos/spoofing/verif"
+# 1. The database to use
+base_output_dir = "/idiap/temp/aanjos/spoofing/verif-bob"
 
-# 1/ Face normalization
+# 2. Face normalization
 #video_input_dir = '/Users/andre/work/replay/protocols'
 video_input_dir = '/idiap/group/replay/database/protocols'
 pos_input_dir = os.path.join(video_input_dir, 'keylemon-face-locations')
@@ -36,7 +34,7 @@ OVERLAP_H = 7
 OVERLAP_W = 7
 N_DCT_COEF = 28
 
-# 2/ UBM
+# 3. UBM
 frames_to_use = 375 #use up to frame #375
 ubm_filename = os.path.join(base_output_dir, "ubm.hdf5")
 gmmstats_dir = os.path.join(base_output_dir, "gmmstats")
@@ -50,7 +48,7 @@ update_means = True
 update_variances = True
 norm_KMeans = True
 
-# 3/ GMM
+# 4. GMM
 tnorm_models_dir = os.path.join(base_output_dir, "tnorm_models")
 iterg_enrol = 1
 convergence_threshold = 0.0005

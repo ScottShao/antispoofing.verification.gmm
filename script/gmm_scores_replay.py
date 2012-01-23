@@ -4,7 +4,7 @@
 
 import os
 import sys
-import torch
+import bob
 import utils
 
 import argparse
@@ -24,7 +24,7 @@ def main():
   config = imp.load_source('config', args.config_file)
 
   # Database
-  db = torch.db.replay.Database()
+  db = bob.db.replay.Database()
 
   # (sorted) list of models
   print "Querying database for model names...",

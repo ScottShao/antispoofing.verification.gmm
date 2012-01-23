@@ -11,7 +11,7 @@ and test.
 import sys
 import os
 import argparse
-import torch
+import bob
 import re
 
 CLIENT_RE = re.compile(r'client(?P<n>\d{3})')
@@ -54,7 +54,7 @@ def write_file(clients, stems, config, frames, thourough, filename):
         if not os.path.exists(fname):
           print "WARNING: Ignoring unexisting file %s" % (fname)
           continue
-        data.append(torch.core.array.load(fname)[0,0])
+        data.append(bob.io.load(fname)[0,0])
       if len(data) == 0: 
         average = 0.0
       else:
@@ -86,7 +86,7 @@ def main():
   config = imp.load_source('config', args.config_file)
 
   # Database
-  db = torch.db.replay.Database()
+  db = bob.db.replay.Database()
 
   # Finds the files that belong to the negative and positive samples of each
   # of the experiment groups: devel, test

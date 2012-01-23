@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # vim: set fileencoding=utf-8 :
-# Andre Anjos <andre.dos.anjos@gmail.com>
+# Andre Anjos <andre.anjos@idiap.ch>
 # Wed 20 Jul 11:02:50 2011 
 
 """Classes that help mapping eye-coordinates from face bounding boxes
@@ -35,11 +35,17 @@ class Anthropometry19x19:
   def __init__(self, bbox):
     """Starts a new object with a bounding box"""
     self.bb = bbox
-    self.ratio = self.bb.width / self.MODEL_WIDTH
-    self.anthropo_ratio = (self.D_EYES*self.ratio)/(2*self.PUPIL_SE)
+    if bbox is not None and self.bb.is_valid():
+      self.ratio = self.bb.width / self.MODEL_WIDTH
+      self.anthropo_ratio = (self.D_EYES*self.ratio)/(2*self.PUPIL_SE)
+    else:
+      from . import BoundingBox
+      self.bb = BoundingBox(0,0,0,0)
 
   def eye_centers(self):
     """Returns the eye centers coordinates"""
+
+    if not self.bb.is_valid(): return ((None, None), (None, None))
 
     Rx = (self.ratio * (self.D_EYES + self.MODEL_WIDTH) / 2) + self.bb.x
     Lx = Rx - (self.D_EYES * self.ratio)
@@ -48,6 +54,8 @@ class Anthropometry19x19:
 
   def face_center(self):
     """Returns the mid distance between eye brows and mouth top"""
+
+    if not self.bb.is_valid(): return (None, None)
 
     x = (self.ratio * (self.D_EYES + self.MODEL_WIDTH) / 2.) + self.bb.x
     x -= (self.D_EYES * self.ratio) / 2.
@@ -58,8 +66,10 @@ class Anthropometry19x19:
   def ear_centers(self):
     """Returns the ear centers left, right"""
 
-    Rx = self.bb.x + self.bb.width + (self.ratio * self.D_EYES) / 5.0
-    Lx = self.bb.x
+    if not self.bb.is_valid(): return ((None, None), (None, None))
+
+    Rx = self.bb.x + self.bb.width #+ (self.ratio * self.D_EYES) / 5.0
+    Lx = self.bb.x #- (self.ratio * self.D_EYES) / 5.0
     y = self.bb.y + (self.ratio * self.Y_UPPER)
     y += (self.ratio * self.D_EYES) / 2.
     return ((round(Lx), round(y)), (round(Rx), round(y)))
@@ -68,6 +78,8 @@ class Anthropometry19x19:
     """Returns the mouth bounding box (UNTESTED!) """
 
     from . import BoundingBox
+
+    if not self.bb.is_valid(): BoundingBox(0, 0, 0, 0)
 
     Mx = self.bb.x + (self.bb.width/2.)
     Eye_y = self.bb.y + (self.ratio * self.Y_UPPER)
@@ -80,6 +92,9 @@ class Anthropometry19x19:
     """Returns a bounding box to the eyes area"""
 
     from . import BoundingBox
+    
+    if not self.bb.is_valid(): BoundingBox(0, 0, 0, 0)
+
     Eye_y = self.bb.y + (self.ratio * self.Y_UPPER)
     Eye_x = self.bb.x + (self.bb.width / 2.) # eyes center
     Box_width = (self.EX_EX + 8.*self.EX_EX_SD) * self.anthropo_ratio

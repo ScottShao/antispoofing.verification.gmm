@@ -3,9 +3,9 @@
 # Laurent El Shafey <Laurent.El-Shafey@idiap.ch>
 
 import os 
-import torch
+import bob
+import numpy
 import utils
-
 
 def compute(img_input, pos_input, prep_output,
   CROP_EYES_D, CROP_H, CROP_W, CROP_OH, CROP_OW,
@@ -13,12 +13,12 @@ def compute(img_input, pos_input, prep_output,
   first_annot, force):
 
   # Initialize cropper and destination array
-  FEN = torch.ip.FaceEyesNorm( CROP_EYES_D, CROP_H, CROP_W, CROP_OH, CROP_OW)
-  cropped_img = torch.core.array.float64_2(CROP_H, CROP_W)
+  FEN = bob.ip.FaceEyesNorm( CROP_EYES_D, CROP_H, CROP_W, CROP_OH, CROP_OW)
+  cropped_img = numpy.ndarray((CROP_H, CROP_W), 'float64')
 
   # Initialize the Tan and Triggs preprocessing
-  TT = torch.ip.TanTriggs( GAMMA, SIGMA0, SIGMA1, SIZE, THRESHOLD, ALPHA)
-  preprocessed_img = torch.core.array.float64_2(CROP_H, CROP_W)
+  TT = bob.ip.TanTriggs( GAMMA, SIGMA0, SIGMA1, SIZE, THRESHOLD, ALPHA)
+  preprocessed_img = numpy.ndarray((CROP_H, CROP_W), 'float64')
 
   # process the 'dictionary of files'
   for k in img_input:
@@ -32,11 +32,11 @@ def compute(img_input, pos_input, prep_output,
       print "Preprocessing sample %s with Tan and Triggs." % (img_input[k])
 
       # input image file
-      img_unk = torch.core.array.load( str(img_input[k]) )
+      img_unk = bob.io.load( str(img_input[k]) )
       
       # convert to grayscale
-      if(img_unk.dimensions() == 3):
-        img = torch.ip.rgb_to_gray(img_unk)
+      if(len(img_unk.shape) == 3):
+        img = bob.ip.rgb_to_gray(img_unk)
       else:
         img = img_unk
 

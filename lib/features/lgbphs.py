@@ -2,9 +2,10 @@
 # vim: set fileencoding=utf-8 :
 # Laurent El Shafey <Laurent.El-Shafey@idiap.ch>
 
-import os, math
-import torch
-
+import os
+import math
+import bob
+import numpy
 
 def compute(img_input, pos_input, features_output,
   CROP_EYES_D, CROP_H, CROP_W, CROP_OH, CROP_OW,
@@ -16,24 +17,24 @@ def compute(img_input, pos_input, features_output,
   first_annot, force):
 
   # Initializes cropper and destination array
-  FEN = torch.ip.FaceEyesNorm( CROP_EYES_D, CROP_H, CROP_W, CROP_OH, CROP_OW)
-  cropped_img = torch.core.array.float64_2(CROP_H, CROP_W)
+  FEN = bob.ip.FaceEyesNorm( CROP_EYES_D, CROP_H, CROP_W, CROP_OH, CROP_OW)
+  cropped_img = numpy.ndarray((CROP_H, CROP_W), 'float64')
 
   # Initializes the Tan and Triggs preprocessing
-  TT = torch.ip.TanTriggs( GAMMA, SIGMA0, SIGMA1, SIZE, THRESHOLD, ALPHA)
-  preprocessed_img = torch.core.array.float64_2(CROP_H, CROP_W)
+  TT = bob.ip.TanTriggs( GAMMA, SIGMA0, SIGMA1, SIZE, THRESHOLD, ALPHA)
+  preprocessed_img = numpy.ndarray((CROP_H, CROP_W), 'float64')
 
   # Initializes the Gabor filterbank and the destination arrays
-  GB = torch.ip.GaborBankFrequency( CROP_H, CROP_W, N_ORIENT, N_FREQ, FMAX, ORIENTATION_FULL, 
+  GB = bob.ip.GaborBankFrequency( CROP_H, CROP_W, N_ORIENT, N_FREQ, FMAX, ORIENTATION_FULL, 
           K, P, OPTIMAL_GAMMA_ETA, GAMMA_G, ETA_G, PF, CANCEL_DC)
   if USE_ENVELOPE == False: GB.use_envelope = False
-  gabor_imgs = torch.core.array.complex128_3( N_ORIENT*N_FREQ, CROP_H, CROP_W)
+  gabor_imgs = numpy.ndarray((N_ORIENT*N_FREQ, CROP_H, CROP_W), 'complex128')
   gabor_imgs_mag_2d=[]
   for ig in range(0,N_ORIENT*N_FREQ):
-    gabor_imgs_mag_2d.append(torch.core.array.float64_2( CROP_H, CROP_W))
+    gabor_imgs_mag_2d.append(numpy.ndarray((CROP_H, CROP_W), 'float64'))
 
   # Initializes LBPHS processor
-  LBPHSF = torch.ip.LBPHSFeatures( BLOCK_H, BLOCK_W, OVERLAP_H, OVERLAP_W, RADIUS, P_N, CIRCULAR, TO_AVERAGE, ADD_AVERAGE_BIT, UNIFORM, ROT_INV)
+  LBPHSF = bob.ip.LBPHSFeatures( BLOCK_H, BLOCK_W, OVERLAP_H, OVERLAP_W, RADIUS, P_N, CIRCULAR, TO_AVERAGE, ADD_AVERAGE_BIT, UNIFORM, ROT_INV)
 
   # Processes the 'dictionary of files'
   for k in img_input:
@@ -54,11 +55,11 @@ def compute(img_input, pos_input, features_output,
       print "Computing features from sample %s." % (img_input[k])
 
       # Loads image file
-      img_unk = torch.core.array.load( str(img_input[k]) )
+      img_unk = bob.io.load( str(img_input[k]) )
       
       # Converts to grayscale
-      if(img_unk.dimensions() == 3):
-        img = torch.ip.rgb_to_gray(img_unk)
+      if(len(img_unk.shape) == 3):
+        img = bob.ip.rgb_to_gray(img_unk)
       else:
         img = img_unk
 
@@ -79,15 +80,15 @@ def compute(img_input, pos_input, features_output,
       # Calls the preprocessing algorithm
       GB(src_cplx, gabor_imgs)
       # Converts 3D array to a list of 2D arrays
-      for x in range(gabor_imgs.extent(0)):
-        for y in range(gabor_imgs.extent(1)):
-          for z in range(gabor_imgs.extent(2)):
+      for x in range(gabor_imgs.shape[0]):
+        for y in range(gabor_imgs.shape[1]):
+          for z in range(gabor_imgs.shape[2]):
             gabor_imgs_mag_2d[x][y,z] = abs(gabor_imgs[x,y,z])
       
       for ig in range(0,len(gabor_imgs_mag_2d)):
         # Computes LBP histograms
         lbphs_blocks = LBPHSF(gabor_imgs_mag_2d[ig])
-        lbphs_array = torch.core.array.int32_2(len(lbphs_blocks), LBPHSF.NBins)
+        lbphs_array = numpy.ndarray((len(lbphs_blocks), LBPHSF.NBins), 'int32')
         for bi in range(0,len(lbphs_blocks)):
           lbpb = lbphs_blocks[bi]
           for j in range(LBPHSF.NBins):
