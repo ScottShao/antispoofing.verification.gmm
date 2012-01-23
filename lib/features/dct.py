@@ -12,7 +12,7 @@ def normalizeBlocks(src):
   for i in range(src.shape[0]):
     block = src[i, :, :]
     mean = block.mean()
-    std = ((block - mean) ** 2).sum() / block.size()
+    std = ((block - mean) ** 2).sum() / block.size
     if std == 0:
       std = 1
     else:
@@ -24,7 +24,7 @@ def normalizeDCT(src):
   for i in range(src.shape[1]):
     col = src[:, i]
     mean = col.mean()
-    std = ((col - mean) ** 2).sum() / col.size()
+    std = ((col - mean) ** 2).sum() / col.size
     if std == 0:
       std = 1
     else:

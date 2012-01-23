@@ -9,7 +9,7 @@ import sys
 import subprocess
 
 # Choose here the bob release you want to use:
-DEFAULT_TORCH_DIR = '/idiap/home/aanjos/work/torch/v0.1-pre-numpy'
+DEFAULT_TORCH_DIR = '/idiap/home/aanjos/work/bob'
 
 def find_install_dir():
   """Test to see if I find my own libraries, otherwise, we are probably running
