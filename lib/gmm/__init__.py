@@ -11,9 +11,8 @@ def load_data(files):
   """Concatenates a list of blitz arrays into an Arrayset"""
   data = bob.io.Arrayset()
   for f in files:
-    data.extend(bob.io.Array(str(f)))
+    data.extend(bob.io.load(str(f)))
   return data
-
 
 def NormalizeStdArrayset(arrayset):
   """Applies a unit variance normalization to an arrayset"""
@@ -31,7 +30,7 @@ def NormalizeStdArrayset(arrayset):
 
   # Computes mean and variance
   for array in arrayset:
-    x = array.get().astype('float64')
+    x = array.astype('float64')
     mean += x
     std += (x ** 2)
 
@@ -42,15 +41,15 @@ def NormalizeStdArrayset(arrayset):
 
   arStd = bob.io.Arrayset()
   for array in arrayset:
-    arStd.append(array.get().astype('float64') / std)
+    arStd.append(array.astype('float64') / std)
 
   return (arStd,std)
 
 
 def multiplyVectorsByFactors(matrix, vector):
   """Used to unnormalise some data"""
-  for i in range(0, matrix.rows()):
-    for j in range(0, matrix.columns()):
+  for i in range(0, matrix.shape[0]):
+    for j in range(0, matrix.shape[1]):
       matrix[i, j] *= vector[j]
 
 
@@ -71,7 +70,7 @@ def gmm_train_UBM(train_files, ubm_filename,
   else:
     (normalizedAr,stdAr) = NormalizeStdArrayset(ar)
 
-  #bob.io.Array(stdAr).save("/idiap/home/lelshafey/Desktop/STD_ARR.hdf5")
+  #bob.io.save(stdAr, "/idiap/home/lelshafey/Desktop/STD_ARR.hdf5")
 
   # Creates the machines (KMeans and GMM)
   kmeans = bob.machine.KMeansMachine(n_gaussians, input_size)
@@ -87,9 +86,9 @@ def gmm_train_UBM(train_files, ubm_filename,
 
   [variances, weights] = kmeans.getVariancesAndWeightsForEachCluster(normalizedAr)
   means = kmeans.means
-  #bob.io.Array(means).save("/idiap/home/lelshafey/Desktop/KMEANS_AFTER_means.hdf5")
-  #bob.io.Array(variances).save("/idiap/home/lelshafey/Desktop/KMEANS_AFTER_variances.hdf5")
-  #bob.io.Array(weights).save("/idiap/home/lelshafey/Desktop/KMEANS_AFTER_weights.hdf5")
+  #bob.io.save(means, "/idiap/home/lelshafey/Desktop/KMEANS_AFTER_means.hdf5")
+  #bob.io.save(variances, "/idiap/home/lelshafey/Desktop/KMEANS_AFTER_variances.hdf5")
+  #bob.io.save(weights, "/idiap/home/lelshafey/Desktop/KMEANS_AFTER_weights.hdf5")
 
   # Undoes the normalization
   if norm_KMeans:
@@ -209,7 +208,7 @@ def gmm_scores_replay(model_filename, probe_file, probe_output, ubm_filename):
     # Saves the A row vector for each model and Z-Norm samples split
     A = bob.machine.linearScoring(model, ubm, stats, None, True)
     utils.ensure_dir(os.path.dirname(probe_output[k]))
-    A.save(probe_output[k])
+    bob.io.save(A, probe_output[k])
     print "Processed (%d/%d)\n  %s\n  %s" % (k+1, len(probe_file), v, probe_output[k])
 
 def gmm_scores_A(models_ids, models_dir, probe_files, ubm_filename, db,
@@ -243,11 +242,12 @@ def gmm_scores_A(models_ids, models_dir, probe_files, ubm_filename, db,
 
     # Saves the A row vector for each model and Z-Norm samples split
     A = bob.machine.linearScoring(models, ubm, probe_tests)
-    bob.io.Array(A).save(os.path.join(zt_norm_A_dir, group, str(model_id) + "_" + str(probes_split_id).zfill(4) + ".hdf5"))
+    bob.io.save(A, os.path.join(zt_norm_A_dir, group, str(model_id) + "_" + str(probes_split_id).zfill(4) + ".hdf5"))
 
     # Saves to text file
     import utils
-    scores_list = utils.convertScoreToList(A.as_row(), probe_files)
+    scores_list = utils.convertScoreToList(numpy.reshape(A, A.size),
+        probe_files)
     sc_nonorm_filename = os.path.join(scores_nonorm_dir, group, str(model_id) + "_" + str(probes_split_id).zfill(4) + ".txt")
     f_nonorm = open(sc_nonorm_filename, 'w')
     for x in scores_list:
@@ -285,7 +285,7 @@ def gmm_ztnorm_B(models_ids, models_dir, zfiles, ubm_filename, db,
 
     # Save the B row vector for each model and Z-Norm samples split
     B = bob.machine.linearScoring(models, ubm, znorm_tests)
-    bob.io.Array(B).save(os.path.join(zt_norm_B_dir, group, str(model_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))
+    bob.io.save(B, os.path.join(zt_norm_B_dir, group, str(model_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))
 
 
 def gmm_ztnorm_C(tmodel_id, tnorm_models_dir, probe_files, ubm_filename, db,
@@ -314,7 +314,7 @@ def gmm_ztnorm_C(tmodel_id, tnorm_models_dir, probe_files, ubm_filename, db,
 
   # Saves the C row vector for each T-Norm model and samples split
   C = bob.machine.linearScoring(tmodels, ubm, probe_tests)
-  bob.io.Array(C).save(os.path.join(zt_norm_C_dir, group, "TM" + str(tmodel_id) + "_" + str(probes_split_id).zfill(4) + ".hdf5"))
+  bob.io.save(C, os.path.join(zt_norm_C_dir, group, "TM" + str(tmodel_id) + "_" + str(probes_split_id).zfill(4) + ".hdf5"))
 
 
 def gmm_ztnorm_D(tnorm_models_ids, tnorm_models_dir, zfiles, ubm_filename, db,
@@ -348,6 +348,6 @@ def gmm_ztnorm_D(tnorm_models_ids, tnorm_models_dir, zfiles, ubm_filename, db,
 
     # Save the D and D_sameValue row vector for each T-Norm model and Z-Norm samples split
     D_tm = bob.machine.linearScoring(tnorm_models, ubm, znorm_tests)
-    bob.io.Array(D_tm).save(os.path.join(zt_norm_D_dir, group, str(tmodel_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))
+    bob.io.save(D_tm, os.path.join(zt_norm_D_dir, group, str(tmodel_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))
     D_sameValue_tm = bob.machine.ztnormSameValue(tnorm_clients_ids, znorm_clients_ids)
-    bob.io.Array(D_sameValue_tm).save(os.path.join(zt_norm_D_sameValue_dir, group, str(tmodel_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))
+    bob.io.save(D_sameValue_tm, os.path.join(zt_norm_D_sameValue_dir, group, str(tmodel_id) + "_" + str(zsamples_split_id).zfill(4) + ".hdf5"))

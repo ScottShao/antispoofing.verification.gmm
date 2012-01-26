@@ -20,6 +20,8 @@ def main():
       dest='config_file', default="", help='Filename of the configuration file to use to run the script on the grid (defaults to "%(default)s")')
   parser.add_argument('-f', '--force', dest='force', action='store_true',
       default=False, help='Force to erase former data if already exists')
+  parser.add_argument('--grid', dest='grid', action='store_true',
+      default=False, help='If set, assumes it is being run using a parametric grid job. It orders all ids to be processed and picks the one at the position given by ${SGE_TASK_ID}-1')
   args = parser.parse_args()
 
   # Loads the configuration 
@@ -34,6 +36,16 @@ def main():
   db = bob.db.replay.Database()
   files = db.files(cls=('real', 'attack', 'enroll'), 
       directory=config.video_input_dir, extension='.mov')
+
+  # finally, if we are on a grid environment, just find what I have to process.
+  if args.grid:
+    pos = int(os.environ['SGE_TASK_ID']) - 1
+    ordered_keys = sorted(files.keys())
+    if pos >= len(ordered_keys):
+      raise RuntimeError, "Grid request for job %d on a setup with %d jobs" % \
+          (pos, len(ordered_keys))
+    key = ordered_keys[pos] # gets the right key
+    files = {key: files[key]}
 
   for index, key in enumerate(sorted(files.keys())):
     print "Processing file %d (%d/%d)..." % (key, index+1, len(files))
@@ -64,7 +76,11 @@ def main():
       anthropo = faceloc.Anthropometry19x19(locations[frame_index])
 
       if not os.path.exists(os.path.dirname(output_filename)):
-        os.makedirs(os.path.dirname(output_filename))
+        try:
+          os.makedirs(os.path.dirname(output_filename))
+        except OSError, e:
+          if e.errno != 17: # != File exists
+            raise
 
       # some house-keeping commands
       if os.path.exists(output_filename):

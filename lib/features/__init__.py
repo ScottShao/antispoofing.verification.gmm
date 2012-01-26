@@ -5,6 +5,3 @@
 """Features for face recognition"""
 
 import dct
-import gabordct
-import lgbphs
-import tantriggs

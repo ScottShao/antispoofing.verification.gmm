@@ -69,7 +69,7 @@ def dctfeatures(prep, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W,
     dct_blocks_max -= 2
     TMP_tensor_min += 2
   
-  TMP_tensor = numpy.array((n_blocks, TMP_tensor_max), 'float64')
+  TMP_tensor = numpy.ndarray((n_blocks, TMP_tensor_max), 'float64')
   
   nBlocks = bob.ip.getNBlocks(prep, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W)
   for by in range(nBlocks[0]):
@@ -172,4 +172,4 @@ def compute_loaded_replay(img_input, pos_input, features_output,
       False)
 
   # Saves to file
-  dct_blocks.save(features_output)
+  bob.io.save(dct_blocks, features_output)

@@ -48,6 +48,14 @@ features required by the scripts that follow this one.
 
   $ ./shell.py -- script/replay_dct_features.py --config-file=config/gmm_replay.py
 
+This will run through the 1300 videos in the database and extract the features
+at the frame intervals defined at the configuration. You can execute everything
+in parallel, at the SGE grid by doing like this:
+
+.. code-block:: sh
+
+  $ ./shell.py -- script/grid_replay_dct_features.py --config-file=config/gmm_replay.py
+
 4. UBM Training
 ---------------
 
@@ -95,7 +103,7 @@ step 5 above as it only depends on the input features pre-calculated at step 3.
 
 .. code-block:: sh
 
-  $./shell.py -- ./script/gmm_models_replay.py --config-file=config/gmm_replay.py
+  $ ./shell.py -- ./script/gmm_models_replay.py --config-file=config/gmm_replay.py
 
 If you think the above job is too slow, you also have a grid alternative:
 

@@ -3,7 +3,7 @@
 import os
 
 # 1. The database to use
-base_output_dir = "/idiap/temp/aanjos/spoofing/verif-bob"
+base_output_dir = "/idiap/temp/aanjos/spoofing/full-verif-bob"
 
 # 2. Face normalization
 #video_input_dir = '/Users/andre/work/replay/protocols'

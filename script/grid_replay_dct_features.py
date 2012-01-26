@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# Laurent El Shafey <Laurent.El-Shafey@idiap.ch>
+# Andre Anjos <andre.anjos@idiap.ch>
+# Wed 25 Jan 2012 08:50:52 CET
 
 """Submits all feature creation jobs to the Idiap grid"""
 
@@ -31,8 +32,8 @@ BOB_DIR = checked_directory(FACEVERIFLIB_DIR, 'bob')
 
 # This is a hard-coded number of array jobs we are targeting, for
 # parametric jobs. It corresponds to the following query:
-# len(x.files(cls=('attack', 'real'), groups=('devel', 'test')))
-TOTAL_REPLAY_FILES = 840
+# len(bob.db.replay.Database().files(cls=('attack', 'real', 'enroll')))
+TOTAL_REPLAY_FILES = 1300
 
 # The wrapper is required to bracket the execution environment for the faceveriflib
 # scripts:
@@ -78,7 +79,7 @@ def main():
   # Computes the GMM Stats if linear scoring is performed
   job_gmmstats = []
   cmd_gmmstats =  [
-                    'gmm_stats_replay.py',  
+                    'replay_dct_features.py',
                     '--config-file=%s' % args.config_file, 
                     '--grid'
                   ]
