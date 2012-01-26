@@ -150,5 +150,8 @@ command:
 
   $ ./shell.py -- script/plot_scores.py /idiap/temp/aanjos/spoofing/verif/performance/test-base-thourough-verif.4c /idiap/temp/aanjos/spoofing/verif/performance/test-photo-220.4c --overlay-protocol="Photo Attack" --title="Baseline GMM and PHOTO-ATTACK (spoofs) - Test set"
 
-After this step, you are on your own to plot the performance tables as your
-liking.
+You can plot performance tables with the following command:
+
+.. code-block:: sh
+
+  $ ./shell.py -- compute_perf.py --no-plot --devel=/idiap/temp/aanjos/spoofing/verif/performance/devel-base-thourough-verif.4c --test=/idiap/temp/aanjos/spoofing/verif/performance/test-base-thourough-verif.4c
