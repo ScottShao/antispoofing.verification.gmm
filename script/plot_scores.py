@@ -24,6 +24,10 @@ def main():
       dest='protocol', default="", help='Legend that will be used for the overlaied negatives (spoofing attacks)')
   parser.add_argument('-t', '--title', metavar='STR', type=str,
       dest='title', default="", help='Plot title')
+  parser.add_argument('-l', '--line', metavar='FLOAT', type=float,
+      dest='line', help='If set, draws a vertical line on the plot (to indicate a threshold)')
+  parser.add_argument('-L', '--line-legend', metavar='STR', type=str,
+      default='threshold', dest='lineleg', help='If you set a vertical line to be created on the plot, you can set a legend for it using this flag. Otherwise, it will just say "%(default)s"')
 
   args = parser.parse_args()
 
@@ -41,6 +45,10 @@ def main():
       normed=True)
   mpl.hist(over_neg, bins=20, color='black', alpha=0.5, label=args.protocol,
       normed=True)
+  if args.line is not None:
+    ax = mpl.axis()
+    mpl.axvline(x=args.line, ymin=ax[2], ymax=ax[3], linewidth=2,
+        color='green', linestyle='--', label=args.lineleg)
 
   mpl.title(args.title)
   mpl.xlabel("Verification Scores")

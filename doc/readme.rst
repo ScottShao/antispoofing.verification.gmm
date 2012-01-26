@@ -134,11 +134,29 @@ this problem like this:
 
 After scores are calculated, you need to put them together to setup development
 and test text files in either 4 or 5 column formats. To do that, use the
-application ``replay_perf_table.py``:
+application ``replay_perf_table.py``. The next command will generate the
+baseline verification results by thouroughly matching every client video
+against every model available in the individual sets, averaging over 220
+frames:
 
 .. code-block:: sh
 
-  $ ./shell.py -- ./script/replay_perf_table.py --config-file=config/gmm_replay.py
+  $ ./shell.py -- ./script/replay_perf_table.py --thourough --frames=220 --config-file=config/gmm_replay.py
+
+You can specify to use the attack protocols like this (avoid using the
+`--thourough` option):
+
+.. code-block:: sh
+
+  $ ./shell.py -- ./script/replay_perf_table.py --protocol=grandtest --frames=220 --config-file=config/gmm_replay.py
+
+There is a script called `script/create_all_tables.sh` that will run on all
+common combinations of protocols and number of frames and will dump the output
+on the `config.base_output_dir/performance/` directory. You can just call it:
+
+.. code-block:: sh
+
+  $ ./shell.py -- ./script/create_all_tables.sh
 
 9. Score Histograms
 -------------------
@@ -148,10 +166,10 @@ command:
 
 .. code-block:: sh
 
-  $ ./shell.py -- script/plot_scores.py /idiap/temp/aanjos/spoofing/verif/performance/test-base-thourough-verif.4c /idiap/temp/aanjos/spoofing/verif/performance/test-photo-220.4c --overlay-protocol="Photo Attack" --title="Baseline GMM and PHOTO-ATTACK (spoofs) - Test set"
+  $ ./shell.py -- script/plot_scores.py /idiap/temp/aanjos/spoofing/verif/performance/test-baseline-thourough-220.4c /idiap/temp/aanjos/spoofing/verif/performance/test-photo-220.4c --overlay-protocol="Photo Attack" --title="Baseline GMM and PHOTO-ATTACK (spoofs) - Test set"
 
 You can plot performance tables with the following command:
 
 .. code-block:: sh
 
-  $ ./shell.py -- compute_perf.py --no-plot --devel=/idiap/temp/aanjos/spoofing/verif/performance/devel-base-thourough-verif.4c --test=/idiap/temp/aanjos/spoofing/verif/performance/test-base-thourough-verif.4c
+  $ ./shell.py -- compute_perf.py --no-plot --devel=/idiap/temp/aanjos/spoofing/verif/performance/devel-baseline-thourough-verif.4c --test=/idiap/temp/aanjos/spoofing/verif/performance/test-baseline-thourough-220.4c
