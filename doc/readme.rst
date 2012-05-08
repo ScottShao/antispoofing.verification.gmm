@@ -158,8 +158,22 @@ on the `config.base_output_dir/performance/` directory. You can just call it:
 
   $ ./shell.py -- ./script/create_all_tables.sh
 
-9. Score Histograms
--------------------
+.. warning::
+
+  It is possible you see warnings being emitted by the above programs in
+  certain cases. This is **normal**. The warnings correspond to cases in which
+  the program is trying to collect data from a certain frame number in which a
+  face was not detected on the originating video.
+
+9. Score Histograms and Performance Figures
+-------------------------------------------
+
+You can plot performance tables with the following command:
+
+.. code-block:: sh
+
+  $ ./shell.py -- compute_perf.py --no-plot --devel=/idiap/temp/aanjos/spoofing/verif/performance/devel-baseline-thourough-220.4c --test=/idiap/temp/aanjos/spoofing/verif/performance/test-baseline-thourough-220.4c
+
 
 You can plot the histograms of scores distributions using the following
 command:
@@ -168,8 +182,3 @@ command:
 
   $ ./shell.py -- script/plot_scores.py /idiap/temp/aanjos/spoofing/verif/performance/test-baseline-thourough-220.4c /idiap/temp/aanjos/spoofing/verif/performance/test-photo-220.4c --overlay-protocol="Photo Attack" --title="Baseline GMM and PHOTO-ATTACK (spoofs) - Test set"
 
-You can plot performance tables with the following command:
-
-.. code-block:: sh
-
-  $ ./shell.py -- compute_perf.py --no-plot --devel=/idiap/temp/aanjos/spoofing/verif/performance/devel-baseline-thourough-verif.4c --test=/idiap/temp/aanjos/spoofing/verif/performance/test-baseline-thourough-220.4c
