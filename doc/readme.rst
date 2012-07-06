@@ -11,40 +11,95 @@ by TABULA RASA on the Replay Attack database or any of its protocol variants.
 It explains how to setup this package, generate UBM, client models and finally,
 scores as well as how to generate the plots from those.
 
+If you use this package, please refer to the following publications.
+
+1. The Replay-Attack Database and baseline GMM results for it::
+
+    @inproceedings{Chingovska_BIOSIG_2012,
+      author = {I. Chingovska AND A. Anjos AND S. Marcel},
+      keywords = {Attack, Counter-Measures, Counter-Spoofing, Face Recognition, Liveness Detection, Replay, Spoofing},
+      month = sep,
+      title = {On the Effectiveness of Local Binary Patterns in Face Anti-spoofing},
+      booktitle = {IEEE BioSIG 2012},
+      year = {2012},
+  }
+
+2. Bob as the core framework used for these results::
+
+    @inproceedings{Anjos_ACMMM_2012,
+        author = {A. Anjos AND L. El Shafey AND R. Wallace AND M. G\"unther AND C. McCool AND S. Marcel},
+        title = {Bob: a free signal processing and machine learning toolbox for researchers},
+        year = {2012},
+        month = oct,
+        booktitle = {20th ACM Conference on Multimedia Systems (ACMMM), Nara, Japan},
+        publisher = {ACM Press},
+    }
+
 1. Setup
 --------
 
-Create the following links on the root of the directory of the package (where
-this README file is). Make sure to select your *own* local versions of bob and
-gridtk to avoid surprises like nightly build changes and the such.
+This satellite package for `Bob <http://idiap.github.com/bob/>`_ can be
+installed with `Buildout <http://www.buildout.org/>`_. You don't have to have
+`Buildout` installed or even know what it is to make use of this package. Just
+follow the instructions bellow.
 
-.. code-block:: sh
+The first thing to do is to `install Bob
+<https://github.com/idiap/bob/wiki/Releases>`_ if you haven't done so already.
 
-  $ ln -s /idiap/home/aanjos/work/bob bob
-  $ ln -s /idiap/home/aanjos/work/gridtk gridtk
+The second thing to do is to `install the Replay Attack database
+<http://www.idiap.ch/dataset/replayattack/>`_ as explained in that web site.
+Save the base directory name in which you unpacked the database files and use
+it for the Feature Extraction phase bellow.
+
+1.1 If you have `Bob` installed centrally
+-----------------------------------------
+
+If you have `Bob` installed by your system administrator, centrally, you just
+do::
+
+  $ python bootstrap.py
+  $ bin/buildout
+
+And you are ready to start using the package.
+
+1.2 If you have compiled `Bob` yourself
+---------------------------------------
+
+If you installed `Bob` in a location in which Python does not look by default,
+you will have to do a little editing on `localbob.cfg` to define the root
+directory containing the version of `Bob` you want to use and, then::
+
+  $ python bootstrap.py
+  $ bin/buildout -c localbob.cfg
+
+.. note::
+
+  You should use always the same Python interpreter you used to compile `Bob`
+  with.
 
 2. Configuration
 ----------------
 
-Tune configuration at: ``config/gmm_replay.py``:
+The current scripts have been tunned to reproduce the results presented on some
+of our publications, as well as on TABULA RASA reports. Most of them still
+accept a (python) configuration file that can be passed as input. If nothing is
+passed, a default configuration file located at
+`antispoofing/verification/gmm/config/gmm_replay.py` is used. Copy that file to
+the current directory and edit it to modify the overall configuration for the
+mixture-model system or for the (DCT-based) feature extraction.
 
-.. code-block:: sh
+If you modify the configuration file, make sure, for instance, that the base
+output directory is set as per your requirements. All generated material will
+be output there.
 
-  $ vim config/gmm_replay.py
+3. Running the Experiments
+--------------------------
 
-Make sure, for instance, that the base output directory is set as you need. All
-generated material will be output there. If you want to reproduce the TABULA
-RASA baseline, don't change any of the parameters found in there, except for
-input/output directories for the scripts.
+Follow the sequence described here to reproduce paper results.
 
-3. Feature Extraction
----------------------
-
-Run ``replay_dct_features.py`` to create the features. This step only need the
-original database videos as input. It will generate, per video, all input
-features required by the scripts that follow this one.
-
-.. code-block:: sh
+Run ``replay_dct_features.py`` to create the features. This step is only need
+the original database videos as input. It will generate, per video, all input
+features required by the scripts that follow this one::
 
   $ ./shell.py -- script/replay_dct_features.py --config-file=config/gmm_replay.py
 
