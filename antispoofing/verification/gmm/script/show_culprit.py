@@ -12,6 +12,7 @@ import sys
 def main():
 
   if len(sys.argv) != 3:
+    print __doc__
     print "usage: %s filename threshold"
     sys.exit(1)
 
