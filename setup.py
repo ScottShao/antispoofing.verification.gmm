@@ -26,7 +26,7 @@ setup(
         ],
       },
 
-    long_description=open('doc/readme.rst').read(),
+    long_description=open('readme.rst').read(),
 
     install_requires=[
         "bob",      # base signal proc./machine learning library

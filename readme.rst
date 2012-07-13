@@ -19,7 +19,7 @@ publications.
       title = {On the Effectiveness of Local Binary Patterns in Face Anti-spoofing},
       booktitle = {IEEE BioSIG 2012},
       year = {2012},
-  }
+    }
 
 2. Bob as the core framework used for these results::
 
@@ -184,15 +184,18 @@ Idiap.
 Client Model training
 ---------------------
 
-Generate the models for all clients. Note: You can do this in parallel with
-step 5 above as it only depends on the input features pre-calculated at step
-3::
+.. note::
 
-  $ ./script/adapt_models.py --config-file=config/gmm_replay.py
+  You can do this in parallel with step 5 above as it only depends on the input
+  features pre-calculated at step 3
+
+Generate the models for all clients::
+
+  $ ./bin/enrol.py results/dct results/models
 
 If you think the above job is too slow, you can throw it at the grid as well::
 
-  $ ./shell.py -- ./script/grid_gmmmodels_replay.py --config-file=config/gmm_replay.py
+  $ ./bin/jman --array= ./script/enrol.py results/dct results/models --grid
 
 Scoring
 -------
@@ -201,12 +204,12 @@ In this step you will score the videos (every N frames up to a certain frame
 number) against the generated client models. We do this exhaustively for both
 the test and development data. Command line execution goes like this::
 
-  $ ./shell.py -- ./script/gmm_scores_replay.py --config-file=config/gmm_replay.py
+  $ ./bin/score.py results/stats results/ubm.hdf5 results/models results/scores
 
 Linear scoring is fast, but you can also submit a client-based break-down of
 this problem like this::
 
-  $ ./shell.py -- ./script/grid_gmmscores_replay.py --config-file=config/gmm_replay.py
+  $ ./bin/jman --array= ./bin/score.py results/stats results/ubm.hdf5 results/models results/scores
 
 Performance Figures
 -------------------
