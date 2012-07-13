@@ -28,8 +28,8 @@ N_DCT_COEF = 28
 # 3. UBM
 frames_to_use = 375 #use up to frame #375
 nb_gaussians = 512 #number of gaussians on the mixture model
-iterk = 2 #number of kmeans (em) iterations (default to 500)
-iterg_train = 2 #number of gmm (em) iterations (default to 500)
+iterk = 500 #number of kmeans (em) iterations (default to 500)
+iterg_train = 500 #number of gmm (em) iterations (default to 500)
 end_acc = 0.0005
 var_thd = 0.0005
 update_weights = True

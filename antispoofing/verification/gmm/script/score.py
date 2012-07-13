@@ -81,7 +81,7 @@ def main():
     print "done"
 
   # loops over the model ids and compute scores
-  from gmm import score
+  from .. import score
   for model_id in client_list:
 
     # Results go arranged by model id:

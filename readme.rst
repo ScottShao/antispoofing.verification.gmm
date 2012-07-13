@@ -226,13 +226,7 @@ first) 220 frames::
 You can specify to use the attack protocols like this (avoid using the
 `--thourough` option)::
 
-  $ ./shell.py -- ./script/replay_perf_table.py --protocol=grandtest --frames=220 --config-file=config/gmm_replay.py
-
-There is a script called ``script/create_all_tables.sh`` that will run on all
-common combinations of protocols and number of frames and will dump the output
-on the `config.base_output_dir/performance/` directory. You can just call it::
-
-  $ ./shell.py -- ./script/create_all_tables.sh
+  $ ./bin/build_score_files.py --protocol=grandtest --frames=220
 
 .. warning::
 
@@ -240,6 +234,11 @@ on the `config.base_output_dir/performance/` directory. You can just call it::
   certain cases. This is **normal**. The warnings correspond to cases in which
   the program is trying to collect data from a certain frame number in which a
   face was not detected on the originating video.
+
+To reproduce our paper results (82% of attacks passing the verification
+system), you must generate two score files::
+
+STOPPED HERE. (to be continued)
 
 Score Histograms and Performance Figures
 ----------------------------------------

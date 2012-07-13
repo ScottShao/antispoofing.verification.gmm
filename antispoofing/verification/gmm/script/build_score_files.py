@@ -8,9 +8,9 @@ performance computation scripts. Two tables are always generated: development
 and test.
 """
 
-import sys
 import os
 import re
+import sys
 
 CLIENT_RE = re.compile(r'client(?P<n>\d{3})')
 
@@ -21,7 +21,7 @@ def extract_client_no(filename):
   """Extracts the client number from a file"""
   return int(CLIENT_RE.search(os.path.basename(filename)).group(0).replace('client',''))
 
-def write_file(clients, stems, config, frames, thourough, filename):
+def write_file(clients, stems, scoredir, frames, thourough, filename):
   """Writes a 4-column file with the data from the stems given"""
 
   outfile = open(filename, 'w')
@@ -29,7 +29,7 @@ def write_file(clients, stems, config, frames, thourough, filename):
   for client_id in clients:
 
     client_no = extract_client_no(client_id) #this will work!
-    score_dir = os.path.join(config.scores_dir, client_id)
+    score_dir = os.path.join(scoredir, client_id)
     dirs = [k for k in os.listdir(score_dir) if int(k) <= frames]
 
     for key, stem in stems.iteritems(): #all samples
@@ -48,7 +48,7 @@ def write_file(clients, stems, config, frames, thourough, filename):
       if is_attack(stem): claimed_id = 'attack'
 
       for d in dirs:
-        fname = os.path.join(config.scores_dir, client_id, d, stem + '.hdf5')
+        fname = os.path.join(scoredir, client_id, d, stem + '.hdf5')
         if not os.path.exists(fname):
           print "WARNING: Ignoring unexisting file %s" % (fname)
           continue
@@ -66,6 +66,10 @@ def main():
   parser = argparse.ArgumentParser(description=__doc__,
       formatter_class=argparse.RawDescriptionHelpFormatter)
 
+  parser.add_argument('scores', metavar='DIR', type=str, help='Root directory containing the scores per video for the Replay-Attack database')
+ 
+  parser.add_argument('outputdir', metavar='DIR', type=str, help='Directory where the merged scores will be saved at')
+  
   parser.add_argument('-p', '--protocol', metavar='PROTOCOL', type=str,
       dest='protocol', help='The name of the protocol to use when evaluating the performance of the data on face verification (defaults to "%(default)s)". If you do *not* specify a protocol, just run the baseline face verification.')
 
@@ -150,19 +154,19 @@ def main():
   template += ('-%d' % args.frames)
   template += '.4c'
 
-  outdir = os.path.join(config.base_output_dir, 'performance')
+  args.outputdir = os.path.join(args.outputdir)
 
-  if not os.path.exists(outdir): os.makedirs(outdir)
+  if not os.path.exists(args.outputdir): os.makedirs(args.outputdir)
 
   # Runs the whole shebang for writing an output file
-  devfile = os.path.join(outdir, template % 'devel')
-  write_file(dev_client, dev_real_dict, config, args.frames, args.thourough,
-      devfile)
+  devfile = os.path.join(args.outputdir, template % 'devel')
+  write_file(dev_client, dev_real_dict, args.scores, args.frames,
+      args.thourough, devfile)
   print "wrote: %s" % devfile
 
-  testfile = os.path.join(outdir, template % 'test')
-  write_file(test_client, test_real_dict, config, args.frames, args.thourough,
-      testfile)
+  testfile = os.path.join(args.outputdir, template % 'test')
+  write_file(test_client, test_real_dict, args.scores, args.frames,
+      args.thourough, testfile)
   print "wrote: %s" % testfile
 
 if __name__ == '__main__':
