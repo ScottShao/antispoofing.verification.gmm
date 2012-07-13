@@ -4,7 +4,7 @@
 
 import os
 import math
-import utils
+from .. import utils
 import bob
 import numpy
 
@@ -35,7 +35,7 @@ def normalizeDCT(src):
 def dctfeatures(prep, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W, 
     A_N_DCT_COEF, norm_before, norm_after, add_xy):
   
-  blockShape = bob.ip.getBlockShape(prep, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W)
+  blockShape = bob.ip.get_block_shape(prep, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W)
   blocks = numpy.ndarray(blockShape, 'float64')
   bob.ip.block(prep, blocks, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W)
 
@@ -71,7 +71,7 @@ def dctfeatures(prep, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W,
   
   TMP_tensor = numpy.ndarray((n_blocks, TMP_tensor_max), 'float64')
   
-  nBlocks = bob.ip.getNBlocks(prep, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W)
+  nBlocks = bob.ip.get_n_blocks(prep, A_BLOCK_H, A_BLOCK_W, A_OVERLAP_H, A_OVERLAP_W)
   for by in range(nBlocks[0]):
     for bx in range(nBlocks[1]):
       bi = bx + by * nBlocks[1]

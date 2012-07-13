@@ -1,32 +1,48 @@
 #!/usr/bin/env python
 # vim: set fileencoding=utf-8 :
-# Laurent El Shafey <Laurent.El-Shafey@idiap.ch>
+# Andre Anjos <andre.anjos@idiap.ch>
+# Fri 13 Jul 2012 14:00:47 CEST
 
-import os, sys
-import bob
-import utils
+"""Enrolls GMMs for the Replay-Attack database using MAP adaptation"""
 
-import argparse
+import os
+import sys
 
 def main():
 
+  import argparse
+
   parser = argparse.ArgumentParser(description=__doc__,
       formatter_class=argparse.RawDescriptionHelpFormatter)
-  parser.add_argument('-g', '--group', metavar='STR', type=str,
-      dest='group', default="", help='Database group (\'dev\' or \'eval\') for which to retrieve models.')
-  parser.add_argument('-c', '--config-file', metavar='FILE', type=str,
-      dest='config_file', default="", help='Filename of the configuration file to use to run the script on the grid (defaults to "%(default)s")')
+
+  parser.add_argument('features', metavar='DIR', type=str, help='Root directory containing the extracted features from the Replay-Attack database')
+ 
+  parser.add_argument('outputdir', metavar='DIR', type=str, help='Directory where the models will be saved at')
+  
+  parser.add_argument('-c', '--config-file', metavar='FILE', type=str, dest='config', default=None, help='Filename of the configuration file with parameters for feature extraction and verification (defaults to loading what is in the module "antispoofing.verification.gmm.config.gmm_replay")')
+
   parser.add_argument('-f', '--force', dest='force', action='store_true',
-      default=False, help='Force to erase former data if already exist')
+      default=False, help='Force to erase former data if already exists')
+  
   parser.add_argument('--grid', dest='grid', action='store_true',
-      default=False, help='If set, assumes it is being run using a parametric grid job. It orders all ids to be processed and picks the one at the position given by ${SGE_TASK_ID}-1')
+      default=False, help=argparse.SUPPRESS)
+
+  from ..version import __version__
+  name = os.path.basename(os.path.splitext(sys.argv[0])[0])
+  parser.add_argument('-V', '--version', action='version',
+      version='PB-GMM for ReplayAttack Database v%s (%s)' % (__version__, name))
+  
   args = parser.parse_args()
 
   # Loads the configuration 
-  import imp 
-  config = imp.load_source('config', args.config_file)
+  if args.config is None:
+    import antispoofing.verification.gmm.config.gmm_replay as config
+  else:
+    import imp
+    config = imp.load_source('config', args.config)
 
   # Database
+  import bob
   db = bob.db.replay.Database()
 
   # Enrollment files
@@ -36,8 +52,8 @@ def main():
   enroll_files = {}
   for key, value in process.iteritems():
     client = value.split('_')[0].split('/')[1] #terrible hack!
-    for d in os.listdir(config.features_dir):
-      f = os.path.join(config.features_dir, d, value + '.hdf5')
+    for d in os.listdir(args.features):
+      f = os.path.join(args.features, d, value + '.hdf5')
       if enroll_files.has_key(client): enroll_files[client].append(f)
       else: enroll_files[client] = [f]
 
@@ -51,13 +67,16 @@ def main():
     enroll_files = {only_id: enroll_files[only_id]}
 
   # Checks that the base directory for storing the T-Norm models exists
-  utils.ensure_dir(config.models_dir)
+  from ...utils import ensure_dir
+  ensure_dir(args.outputdir)
 
   # Trains the models
-  import gmm
+  from .. import enrol
+
   for model_id in sorted(enroll_files.keys()):
+
     # Path to the model
-    model_path = os.path.join(config.models_dir, str(model_id) + ".hdf5")
+    model_path = os.path.join(args.outputdir, str(model_id) + ".hdf5")
 
     # Removes old file if required
     if args.force and os.path.exists(model_path):
@@ -68,9 +87,9 @@ def main():
       print "Model %s already exists." % model_path
     else:
       print "Enrolling model %s." % model_path
-      gmm.gmm_enrol_model(dict(enumerate(enroll_files[model_id])),
+      enrol(dict(enumerate(enroll_files[model_id])),
           model_path, 
-          config.ubm_filename,
+          args.ubm,
           config.iterg_enrol,
           config.convergence_threshold,
           config.variance_threshold,

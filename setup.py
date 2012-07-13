@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name='antispoofing.verification.gmm',
-    version='0.1',
-    description='Replay-Attack Face Verification Package Based on Gaussian Mixture Models',
+    version='1.0',
+    description='Replay-Attack Face Verification Package Based on a Parts-Based Gaussian Mixture Models',
     license='LICENSE.txt',
 
     author='Andre Anjos',
@@ -13,17 +13,14 @@ setup(
 
     entry_points={
       'console_scripts': [
-        'gmm_models_replay.py = antispoofing.verification.gmm.script.gmm_models_replay:main',
-        'gmm_scores_replay.py = antispoofing.verification.gmm.script.gmm_scores_replay:main',
-        'gmm_stats_replay.py = antispoofing.verification.gmm.script.gmm_stats_replay:main',
-        'gmm_ubm_replay.py = antispoofing.verification.gmm.script.gmm_ubm_replay:main',
-        #'grid_gmmmodels_replay.py = antispoofing.verification.gmm.script.grid_gmmmodels_replay:main',
-        #'grid_gmmscores_replay.py = antispoofing.verification.gmm.script.grid_gmmscores_replay:main',
-        #'grid_gmmstats_replay.py = antispoofing.verification.gmm.script.grid_gmmstats_replay:main',
-        #'grid_replay_dct_features.py = antispoofing.verification.gmm.script.grid_replay_dct_features:main',
+        'feature_extract.py = antispoofing.verification.gmm.script.feature_extract:main',
+        'train_ubm.py = antispoofing.verification.gmm.script.train_ubm:main',
+        'generate_statistics.py = antispoofing.verification.gmm.script.generate_statistics:main',
+        'enrol.py = antispoofing.verification.gmm.script.enrol:main',
+        'score.py = antispoofing.verification.gmm.script.score:main',
+
         #'plot_scores_and_counterm.py = antispoofing.verification.gmm.script.plot_scores_and_counterm:main',
         #'plot_scores.py = antispoofing.verification.gmm.script.plot_scores:main',
-        'replay_dct_features.py = antispoofing.verification.gmm.script.replay_dct_features:main',
         'replay_perf_table.py = antispoofing.verification.gmm.script.replay_perf_table:main',
         #'show_culprit.py = antispoofing.verification.gmm.script.show_culprit:main',
         ],
@@ -34,6 +31,5 @@ setup(
     install_requires=[
         "bob",      # base signal proc./machine learning library
         "argparse", # better option parsing
-        "gridtk",   # SGE job submission at Idiap
     ],
 )

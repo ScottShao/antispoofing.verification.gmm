@@ -2,15 +2,10 @@
 
 import os
 
-# 1. The database to use
-base_output_dir = "/idiap/temp/aanjos/spoofing/verif"
-
-# 2. Face normalization
-#video_input_dir = '/Users/andre/work/replay/protocols'
-video_input_dir = '/idiap/group/replay/database/protocols'
-pos_input_dir = os.path.join(video_input_dir, 'keylemon-face-locations')
-features_dir = os.path.join(base_output_dir, "features")
-every_n_frames = 10 #means: take 1 in every N frames
+# Compute features for 1 in every 10 frames of the input. This avoids us to
+# analyze the whole video. If you want to be thorough, put `1` here, but be
+# warned this will generate a lot of data.
+every_n_frames = 10
 
 # Cropping
 CROP_EYES_D = 33
@@ -36,8 +31,6 @@ N_DCT_COEF = 28
 
 # 3. UBM
 frames_to_use = 375 #use up to frame #375
-ubm_filename = os.path.join(base_output_dir, "ubm.hdf5")
-gmmstats_dir = os.path.join(base_output_dir, "gmmstats")
 nb_gaussians = 512
 iterk = 500
 iterg_train = 500
@@ -49,15 +42,10 @@ update_variances = True
 norm_KMeans = True
 
 # 4. GMM
-tnorm_models_dir = os.path.join(base_output_dir, "tnorm_models")
 iterg_enrol = 1
 convergence_threshold = 0.0005
 variance_threshold = 0.0005
 relevance_factor = 4
 responsibilities_threshold = 0
-
-models_dir = os.path.join(base_output_dir, "models")
-scores_dir = os.path.join(base_output_dir, "scores")
-
 linear_scoring = True
 zt_norm = False
