@@ -5,6 +5,9 @@
 
 """Calculates UBM statistics for all input videos in the Replay Attack database"""
 
+import os
+import sys
+
 def main():
 
   import argparse

@@ -104,7 +104,7 @@ def train_ubm(train_files, ubm_filename, n_gaussians=512, iterk=500,
   trainer.train(gmm, ar)
 
   # Saves the UBM to file
-  gmm.save(bob.io.HDF5File(ubm_filename))
+  gmm.save(bob.io.HDF5File(ubm_filename, 'w'))
 
 def generate_statistics(features_input, ubm, gmmstats_output, force=False):
   """Computes GMM statistics against a UBM"""
@@ -144,7 +144,7 @@ def generate_statistics(features_input, ubm, gmmstats_output, force=False):
 
       # Saves the statistics
       utils.ensure_dir(os.path.dirname( str(gmmstats_output[k]) ))
-      gmmstats.save(bob.io.HDF5File( str(gmmstats_output[k]) ))
+      gmmstats.save(bob.io.HDF5File( str(gmmstats_output[k]), 'w' ))
 
 def enrol(enrol_files, model_path, ubm_filename, iterg=1,
     convergence_threshold=0.0005, variance_threshold=0.0005,
@@ -181,7 +181,7 @@ def enrol(enrol_files, model_path, ubm_filename, iterg=1,
   trainer.train(gmm, ar)
 
   # Saves it to the given file
-  gmm.save(bob.io.HDF5File(model_path))
+  gmm.save(bob.io.HDF5File(model_path, 'w'))
 
 def score(model_filename, probe_file, probe_output, ubm_filename):
   """Computes a split of the A matrix for the ZT-Norm and saves the raw scores to file"""

@@ -7,6 +7,7 @@ using selected frames from the training images in the enrollment subset.
 """
 
 import os
+import sys
 
 def main():
 
