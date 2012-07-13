@@ -16,7 +16,7 @@ downloads
 lib
 build
 dist
-spoofverif.egg-info
+*.egg-info
 .mr.developer.cfg
 src
 verif
