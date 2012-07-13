@@ -10,8 +10,6 @@ and test.
 
 import sys
 import os
-import argparse
-import bob
 import re
 
 CLIENT_RE = re.compile(r'client(?P<n>\d{3})')
@@ -63,17 +61,35 @@ def write_file(clients, stems, config, frames, thourough, filename):
 
 def main():
 
+  import argparse
+
   parser = argparse.ArgumentParser(description=__doc__,
       formatter_class=argparse.RawDescriptionHelpFormatter)
-  parser.add_argument('-c', '--config-file', metavar='FILE', type=str,
-      dest='config_file', default="", help='Filename of the configuration file to use to run the script on the grid (defaults to "%(default)s")')
+
   parser.add_argument('-p', '--protocol', metavar='PROTOCOL', type=str,
       dest='protocol', help='The name of the protocol to use when evaluating the performance of the data on face verification (defaults to "%(default)s)". If you do *not* specify a protocol, just run the baseline face verification.')
+
   parser.add_argument('-t', '--thourough', default=False,
       dest='thourough', action='store_true', help='If set will be thourough for client/impostor scores concerning real-accesses (not attacks) while comparing the client model')
+
   parser.add_argument('-f', '--frames', metavar='INT', type=int,
       dest='frames', default=10, help='Number of frames to average the scores from')
+
+  parser.add_argument('-c', '--config-file', metavar='FILE', type=str, dest='config', default=None, help='Filename of the configuration file with parameters for feature extraction and verification (defaults to loading what is in the module "antispoofing.verification.gmm.config.gmm_replay")')
+
+  from ..version import __version__
+  name = os.path.basename(os.path.splitext(sys.argv[0])[0])
+  parser.add_argument('-V', '--version', action='version',
+      version='PB-GMM for ReplayAttack Database v%s (%s)' % (__version__, name))
+  
   args = parser.parse_args()
+
+  # Loads the configuration 
+  if args.config is None:
+    import antispoofing.verification.gmm.config.gmm_replay as config
+  else:
+    import imp
+    config = imp.load_source('config', args.config)
 
   # An adjustment
   if not args.protocol and not args.thourough:
@@ -85,6 +101,7 @@ def main():
   config = imp.load_source('config', args.config_file)
 
   # Database
+  import bob
   db = bob.db.replay.Database()
 
   # Finds the files that belong to the negative and positive samples of each

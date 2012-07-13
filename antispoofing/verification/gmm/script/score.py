@@ -8,6 +8,7 @@ import sys
 def main():
 
   import argparse
+
   parser = argparse.ArgumentParser(description=__doc__,
       formatter_class=argparse.RawDescriptionHelpFormatter)
 

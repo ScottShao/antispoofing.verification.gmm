@@ -38,7 +38,7 @@ update_variances = True
 norm_KMeans = True
 
 # 4. GMM
-iterg_enrol = 1
+iterg_enrol = 1 #number of adaptation iterations
 convergence_threshold = 0.0005
 variance_threshold = 0.0005
 relevance_factor = 4

@@ -18,10 +18,10 @@ setup(
         'generate_statistics.py = antispoofing.verification.gmm.script.generate_statistics:main',
         'enrol.py = antispoofing.verification.gmm.script.enrol:main',
         'score.py = antispoofing.verification.gmm.script.score:main',
+        'build_score_files.py = antispoofing.verification.gmm.script.build_score_files:main',
 
         #'plot_scores_and_counterm.py = antispoofing.verification.gmm.script.plot_scores_and_counterm:main',
         #'plot_scores.py = antispoofing.verification.gmm.script.plot_scores:main',
-        'replay_perf_table.py = antispoofing.verification.gmm.script.replay_perf_table:main',
         #'show_culprit.py = antispoofing.verification.gmm.script.show_culprit:main',
         ],
       },

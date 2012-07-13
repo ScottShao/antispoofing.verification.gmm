@@ -2,8 +2,8 @@
  Parts-Based GMM Verification for the Replay Attack Database
 =============================================================
 
-This `Bob <http://idiap.github.com/bob/>`_ satellite package allows you to run
-a baseline Parts-Based GMM face verification system on the Replay Attack
+This `Bob <http://www.idiap.ch/software/bob/>`_ satellite package allows you to
+run a baseline Parts-Based GMM face verification system on the Replay Attack
 Database. It explains how to setup this package, generate the Universal
 Background Model (UBM), client models and finally, scores.
 
@@ -39,7 +39,7 @@ contact `André Anjos <mailto:andre.anjos@idiap.ch>`_ and/or `Sébastien Marcel
 Installation
 ------------
 
-This satellite package for `Bob <http://idiap.github.com/bob/>`_ can be
+This satellite package for `Bob <http://www.idiap.ch/software/bob/>`_ can be
 installed with `Buildout <http://www.buildout.org/>`_. You don't have to have
 ``Buildout`` installed or even know what it is to make use of this package.
 Just follow the instructions bellow.
@@ -141,11 +141,11 @@ features (in the enrollment/training subset).
 
 .. note::
 
-  Note: if you use ~1k files, it will take ~3 hours to complete and there is no
-  way to parallelize this.  This step requires all features for the training
-  set/enrollment are calculated. The job can take many gigabytes of physical
-  memory from your machine, so we advise you to run it in a machine with, at
-  least, 8 gigabytes of free memory.
+  Note: if you use ~1k files, it will take a few hours to complete and there is
+  currently no way to parallelize this.  This step requires all features for
+  the training set/enrollment are calculated. The job can take many gigabytes
+  of physical memory from your machine, so we advise you to run it in a machine
+  with, at least, 8 gigabytes of free memory.
 
 .. code-block:: sh
 
@@ -211,24 +211,24 @@ this problem like this::
 
   $ ./bin/jman --array= ./bin/score.py results/stats results/ubm.hdf5 results/models results/scores
 
-Performance Figures
--------------------
+Full Score Files
+----------------
 
 After scores are calculated, you need to put them together to setup development
 and test text files in either 4 or 5 column formats. To do that, use the
-application ``replay_perf_table.py``. The next command will generate the
+application ``build_score_files.py``. The next command will generate the
 baseline verification results by thouroughly matching every client video
-against every model available in the individual sets, averaging over 220
-frames::
+against every model available in the individual sets, averaging over (the
+first) 220 frames::
 
-  $ ./shell.py -- ./script/replay_perf_table.py --thourough --frames=220 --config-file=config/gmm_replay.py
+  $ ./bin/build_score_files.py --thourough --frames=220
 
 You can specify to use the attack protocols like this (avoid using the
 `--thourough` option)::
 
   $ ./shell.py -- ./script/replay_perf_table.py --protocol=grandtest --frames=220 --config-file=config/gmm_replay.py
 
-There is a script called `script/create_all_tables.sh` that will run on all
+There is a script called ``script/create_all_tables.sh`` that will run on all
 common combinations of protocols and number of frames and will dump the output
 on the `config.base_output_dir/performance/` directory. You can just call it::
 
