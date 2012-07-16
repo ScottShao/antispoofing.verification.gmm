@@ -19,10 +19,9 @@ setup(
         'enrol.py = antispoofing.verification.gmm.script.enrol:main',
         'score.py = antispoofing.verification.gmm.script.score:main',
         'build_score_files.py = antispoofing.verification.gmm.script.build_score_files:main',
-
-        #'plot_scores_and_counterm.py = antispoofing.verification.gmm.script.plot_scores_and_counterm:main',
-        #'plot_scores.py = antispoofing.verification.gmm.script.plot_scores:main',
-        #'show_culprit.py = antispoofing.verification.gmm.script.show_culprit:main',
+        'apply_threshold.py = bob.measure.script.apply_threshold:main',
+        'eval_threshold.py = bob.measure.script.eval_threshold:main',
+        'compute_perf.py = bob.measure.script.compute_perf:main',
         ],
       },
 

@@ -52,6 +52,13 @@ The second thing to do is to `install the Replay Attack database
 Save the base directory name in which you unpacked the database files and use
 it for the Feature Extraction phase bellow.
 
+.. warning::
+
+  This satellite package has been validated to work against ``Bob-1.0.5``. More
+  recent versions of the ``1.0.x`` branch may work, but no test has been done.
+  If you find difficulties reproducing the results in this package, make sure
+  you are using that precise version of ``Bob``.
+
 If you have `Bob` installed centrally
 =====================================
 
@@ -215,18 +222,17 @@ Full Score Files
 ----------------
 
 After scores are calculated, you need to put them together to setup development
-and test text files in either 4 or 5 column formats. To do that, use the
-application ``build_score_files.py``. The next command will generate the
-baseline verification results by thouroughly matching every client video
-against every model available in the individual sets, averaging over (the
-first) 220 frames::
+and test text files in a 4 or 5 column format. To do that, use the application
+``build_score_files.py``. The next command will generate the baseline
+verification results by thouroughly matching every client video against every
+model available in the individual sets, averaging over (the first) 220 frames::
 
-  $ ./bin/build_score_files.py --thourough --frames=220
+  $ ./bin/build_score_files.py results/scores results/perf --thorough --frames=220
 
 You can specify to use the attack protocols like this (avoid using the
 `--thourough` option)::
 
-  $ ./bin/build_score_files.py --protocol=grandtest --frames=220
+  $ ./bin/build_score_files.py results/scores results/perf --protocol=grandtest --frames=220
 
 .. warning::
 
@@ -235,20 +241,21 @@ You can specify to use the attack protocols like this (avoid using the
   the program is trying to collect data from a certain frame number in which a
   face was not detected on the originating video.
 
-To reproduce our paper results (82% of attacks passing the verification
-system), you must generate two score files::
+Reproduce Paper Results
+-----------------------
 
-STOPPED HERE. (to be continued)
+To reproduce our paper results (~82% of attacks passing the verification
+system), you must generate two score files as defined above and then call a few
+programs that compute the threshold on the development set and apply it to the
+licit and spoofing test sets::
 
-Score Histograms and Performance Figures
-----------------------------------------
+  $ ./bin/eval_threshold.py --scores=results/perf/devel-baseline-thourough-220.4c
+  Threshold: 0.686207566
+  FAR : 0.000% (0/840)
+  FRR : 0.000% (0/60)
+  HTER: 0.000%
 
-You can plot performance tables with the following command::
-
-  $ ./shell.py -- compute_perf.py --no-plot --devel=/idiap/temp/aanjos/spoofing/verif/performance/devel-baseline-thourough-220.4c --test=/idiap/temp/aanjos/spoofing/verif/performance/test-baseline-thourough-220.4c
-
-
-You can plot the histograms of scores distributions using the following
-command::
-
-  $ ./shell.py -- script/plot_scores.py /idiap/temp/aanjos/spoofing/verif/performance/test-baseline-thourough-220.4c /idiap/temp/aanjos/spoofing/verif/performance/test-photo-220.4c --overlay-protocol="Photo Attack" --title="Baseline GMM and PHOTO-ATTACK (spoofs) - Test set"
+  $ ./bin/apply_threshold.py --scores=results/perf/test-grandtest-220.4c --threshold=0.686207566
+  FAR : 82.500% (330/400)
+  FRR : 0.000% (0/80)
+  HTER: 41.250%
