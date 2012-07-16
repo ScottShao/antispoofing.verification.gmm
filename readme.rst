@@ -186,16 +186,16 @@ Client Model training
 
 .. note::
 
-  You can do this in parallel with step 5 above as it only depends on the input
-  features pre-calculated at step 3
+  You can do this in parallel with the step above as it only depends on the
+  input features pre-calculated at step 3
 
 Generate the models for all clients::
 
-  $ ./bin/enrol.py results/dct results/models
+  $ ./bin/enrol.py results/dct results/ubm.hdf5 results/models
 
 If you think the above job is too slow, you can throw it at the grid as well::
 
-  $ ./bin/jman --array= ./script/enrol.py results/dct results/models --grid
+  $ ./bin/jman --array=35 ./script/enrol.py results/dct results/ubm.hdf5 results/models --grid
 
 Scoring
 -------

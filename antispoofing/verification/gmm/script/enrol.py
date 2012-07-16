@@ -17,6 +17,8 @@ def main():
 
   parser.add_argument('features', metavar='DIR', type=str, help='Root directory containing the extracted features from the Replay-Attack database')
  
+  parser.add_argument('ubm', metavar='FILE', type=str, help='The trained UBM')
+  
   parser.add_argument('outputdir', metavar='DIR', type=str, help='Directory where the models will be saved at')
   
   parser.add_argument('-c', '--config-file', metavar='FILE', type=str, dest='config', default=None, help='Filename of the configuration file with parameters for feature extraction and verification (defaults to loading what is in the module "antispoofing.verification.gmm.config.gmm_replay")')
@@ -46,12 +48,14 @@ def main():
   db = bob.db.replay.Database()
 
   # Enrollment files
-  process = db.files(cls="enroll")
+  process = db.files(cls="enroll", groups=("devel", "test"))
 
-  # Temporary hack to get model ids
+  # Temporary hack to get model ids - note: there is no client data that can be
+  # in both sets (development and test), so it is ok to cluster all data in a
+  # client-based dictionary.
   enroll_files = {}
   for key, value in process.iteritems():
-    client = value.split('_')[0].split('/')[1] #terrible hack!
+    client = value.split('_')[0].split(os.sep)[2] #terrible hack!
     for d in os.listdir(args.features):
       f = os.path.join(args.features, d, value + '.hdf5')
       if enroll_files.has_key(client): enroll_files[client].append(f)
@@ -66,7 +70,7 @@ def main():
     only_id = sorted(enroll_files.keys())[pos]
     enroll_files = {only_id: enroll_files[only_id]}
 
-  # Checks that the base directory for storing the T-Norm models exists
+  # Checks that the base directory for storing the models exists
   from ...utils import ensure_dir
   ensure_dir(args.outputdir)
 
@@ -86,7 +90,7 @@ def main():
     if os.path.exists(model_path):
       print "Model %s already exists." % model_path
     else:
-      print "Enrolling model %s." % model_path
+      print "Enrolling model %s..." % model_path
       enrol(dict(enumerate(enroll_files[model_id])),
           model_path, 
           args.ubm,

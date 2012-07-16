@@ -110,7 +110,7 @@ def generate_statistics(features_input, ubm, gmmstats_output, force=False):
   """Computes GMM statistics against a UBM"""
 
   # Initializes GMMStats object 
-  gmmstats = bob.machine.GMMStats(ubm.nGaussians, ubm.nInputs)
+  gmmstats = bob.machine.GMMStats(ubm.dim_c, ubm.dim_d)
 
   # Processes the 'dictionary of files'
   for k in features_input:
@@ -159,7 +159,7 @@ def enrol(enrol_files, model_path, ubm_filename, iterg=1,
   if not os.path.exists(ubm_filename):
       raise RuntimeError, "Cannot find UBM %s" % (ubm_filename)
   ubm = bob.machine.GMMMachine(bob.io.HDF5File(ubm_filename))    
-  ubm.setVarianceThresholds(variance_threshold)
+  ubm.set_variance_thresholds(variance_threshold)
 
   # Creates the trainer
   if responsibilities_threshold == 0.:

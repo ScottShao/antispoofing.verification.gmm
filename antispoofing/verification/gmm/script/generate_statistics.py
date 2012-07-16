@@ -22,7 +22,7 @@ def main():
   parser.add_argument('outputdir', metavar='DIR', type=str, help='Directory where the results for the statistics generation will be placed at')
   
   parser.add_argument('-c', '--config-file', metavar='FILE', type=str,
-      dest='config_file', default="", help='Filename of the configuration file to use to run the script on the grid (defaults to "%(default)s")')
+      dest='config', help='Filename of the configuration file to use to run the script on the grid (defaults to "%(default)s")')
 
   parser.add_argument('-f', '--force', dest='force', action='store_true',
       default=False, help='Force to erase former data if already exist')
