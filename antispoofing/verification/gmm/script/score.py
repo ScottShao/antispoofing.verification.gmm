@@ -93,7 +93,7 @@ def main():
   for d in os.listdir(args.stats):
     test_files += [os.path.join(d,k) for k in L \
         if os.path.exists(os.path.join(args.stats, d , k + '.hdf5'))]
-  print "%d (devel) probes" % len(test_files)
+  print "%d (test) probes" % len(test_files)
  
   # This is the fixed list of input files.
   print "Setting up input file list...",
