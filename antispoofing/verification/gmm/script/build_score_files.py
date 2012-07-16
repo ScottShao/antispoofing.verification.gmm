@@ -11,6 +11,7 @@ and test.
 import os
 import re
 import sys
+import bob
 
 CLIENT_RE = re.compile(r'client(?P<n>\d{3})')
 
@@ -21,8 +22,8 @@ def extract_client_no(filename):
   """Extracts the client number from a file"""
   return int(CLIENT_RE.search(os.path.basename(filename)).group(0).replace('client',''))
 
-def write_file(clients, stems, scoredir, frames, thourough, filename):
-  """Writes a 4-column file with the data from the stems given"""
+def write_file(clients, stems, scoredir, frames, thorough, filename, fivecol):
+  """Writes a 4 or 5-column file with the data from the stems given"""
 
   outfile = open(filename, 'w')
 
@@ -41,7 +42,7 @@ def write_file(clients, stems, scoredir, frames, thourough, filename):
         #skip attacks to different identities.
         continue
 
-      if not thourough and claimed_id != client_no:
+      if not thorough and claimed_id != client_no:
         #skip real-accesses to different identities.
         continue
 
@@ -57,7 +58,10 @@ def write_file(clients, stems, scoredir, frames, thourough, filename):
         average = 0.0
       else:
         average = sum(data)/len(data) #average score for this match
-      outfile.write('%s %s %s %.5e\n' % (client_no, claimed_id, stem, average))
+      if fivecol:
+        outfile.write('%s %s %s %s %.5e\n' % (client_no, client_no, claimed_id, stem, average))
+      else:
+        outfile.write('%s %s %s %.5e\n' % (client_no, claimed_id, stem, average))
 
 def main():
 
@@ -73,11 +77,14 @@ def main():
   parser.add_argument('-p', '--protocol', metavar='PROTOCOL', type=str,
       dest='protocol', help='The name of the protocol to use when evaluating the performance of the data on face verification (defaults to "%(default)s)". If you do *not* specify a protocol, just run the baseline face verification.')
 
-  parser.add_argument('-t', '--thourough', default=False,
-      dest='thourough', action='store_true', help='If set will be thourough for client/impostor scores concerning real-accesses (not attacks) while comparing the client model')
+  parser.add_argument('-t', '--thorough', default=False,
+      dest='thorough', action='store_true', help='If set will be thorough for client/impostor scores concerning real-accesses (not attacks) while comparing the client model')
 
   parser.add_argument('-f', '--frames', metavar='INT', type=int,
       dest='frames', default=10, help='Number of frames to average the scores from')
+
+  parser.add_argument('-5', '--5col', action='store_true', dest='fivecol',
+      default=False, help='Writes a 5-column file format (instead of the default 4 column format)')
 
   parser.add_argument('-c', '--config-file', metavar='FILE', type=str, dest='config', default=None, help='Filename of the configuration file with parameters for feature extraction and verification (defaults to loading what is in the module "antispoofing.verification.gmm.config.gmm_replay")')
 
@@ -96,16 +103,11 @@ def main():
     config = imp.load_source('config', args.config)
 
   # An adjustment
-  if not args.protocol and not args.thourough:
-    print "warning: Forcing 'thourough' on baseline..."
-    args.thourough = True
-
-  # Loads the configuration
-  import imp 
-  config = imp.load_source('config', args.config_file)
+  if not args.protocol and not args.thorough:
+    print "warning: Forcing 'thorough' on baseline..."
+    args.thorough = True
 
   # Database
-  import bob
   db = bob.db.replay.Database()
 
   # Finds the files that belong to the negative and positive samples of each
@@ -115,13 +117,13 @@ def main():
   client_dict = db.files(cls='enroll', groups=('devel'))
   dev_client = set()
   for key, value in client_dict.iteritems():
-    client_id = value.split('_')[0].split('/')[1]
+    client_id = value.split('_')[0].split('/')[2]
     dev_client.add(client_id)
   dev_client = sorted(list(dev_client))
   client_dict = db.files(cls='enroll', groups=('test'))
   test_client = set()
   for key, value in client_dict.iteritems():
-    client_id = value.split('_')[0].split('/')[1]
+    client_id = value.split('_')[0].split('/')[2]
     test_client.add(client_id)
   test_client = sorted(list(test_client))
   print "%d development;" % len(dev_client),
@@ -150,9 +152,10 @@ def main():
   template = '%s'
   proto = args.protocol if args.protocol is not None else 'baseline'
   template += ('-%s' % proto)
-  if args.thourough: template += '-thourough'
+  if args.thorough: template += '-thorough'
   template += ('-%d' % args.frames)
-  template += '.4c'
+  if args.fivecol: template += '.5c'
+  else: template += '.4c'
 
   args.outputdir = os.path.join(args.outputdir)
 
@@ -161,12 +164,12 @@ def main():
   # Runs the whole shebang for writing an output file
   devfile = os.path.join(args.outputdir, template % 'devel')
   write_file(dev_client, dev_real_dict, args.scores, args.frames,
-      args.thourough, devfile)
+      args.thorough, devfile, args.fivecol)
   print "wrote: %s" % devfile
 
   testfile = os.path.join(args.outputdir, template % 'test')
   write_file(test_client, test_real_dict, args.scores, args.frames,
-      args.thourough, testfile)
+      args.thorough, testfile, args.fivecol)
   print "wrote: %s" % testfile
 
 if __name__ == '__main__':
