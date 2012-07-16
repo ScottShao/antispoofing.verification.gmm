@@ -201,7 +201,7 @@ def score(model_filename, probe_file, probe_output, ubm_filename):
   for k,v in enumerate(probe_file):
     stats = [bob.machine.GMMStats(bob.io.HDF5File(str(v)))]
     # Saves the A row vector for each model and Z-Norm samples split
-    A = bob.machine.linear_scoring(model, ubm, stats, None, True)
+    A = bob.machine.linear_scoring(model, ubm, stats, [], True)
     utils.ensure_dir(os.path.dirname(probe_output[k]))
     bob.io.save(A, probe_output[k])
     print "Processed (%d/%d)\n  %s\n  %s" % (k+1, len(probe_file), v, probe_output[k])

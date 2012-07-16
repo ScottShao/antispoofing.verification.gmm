@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # vim: set fileencoding=utf-8 :
-# Laurent El Shafey <Laurent.El-Shafey@idiap.ch>
+# Andre Anjos <andre.anjos@idiap.ch>
+# Mon 16 Jul 2012 09:44:07 CEST
 
 """Derives the Universal Background Model for the Gaussian-Mixture modelling
 using selected frames from the training images in the enrollment subset.
