@@ -202,7 +202,7 @@ Generate the models for all clients::
 
 If you think the above job is too slow, you can throw it at the grid as well::
 
-  $ ./bin/jman --array=35 ./script/enrol.py results/dct results/ubm.hdf5 results/models --grid
+  $ ./bin/jman submit --array=35 ./bin/enrol.py results/dct results/ubm.hdf5 results/models --grid
 
 Scoring
 -------
@@ -216,7 +216,7 @@ the test and development data. Command line execution goes like this::
 Linear scoring is fast, but you can also submit a client-based break-down of
 this problem like this::
 
-  $ ./bin/jman --array=35 ./bin/score.py results/stats results/ubm.hdf5 results/models results/scores --grid
+  $ ./bin/jman submit --array=35 ./bin/score.py results/stats results/ubm.hdf5 results/models results/scores --grid
 
 Full Score Files
 ----------------
