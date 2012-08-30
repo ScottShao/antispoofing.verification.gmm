@@ -8,7 +8,7 @@ Database. It explains how to setup this package, generate the Universal
 Background Model (UBM), client models and finally, scores.
 
 If you use this package and/or its results, please cite the following
-publications.
+publications:
 
 1. The Replay-Attack Database and baseline GMM results for it::
 
@@ -33,60 +33,86 @@ publications.
     }
 
 If you wish to report problems or improvements concerning this code, please
-contact `André Anjos <mailto:andre.anjos@idiap.ch>`_ and/or `Sébastien Marcel
-<mailto:sebastien.marcel@idiap.ch>`_.
+contact the authors of the above mentioned papers.
 
 Installation
 ------------
 
-This satellite package for `Bob <http://www.idiap.ch/software/bob/>`_ can be
-installed with `Buildout <http://www.buildout.org/>`_. You don't have to have
-``Buildout`` installed or even know what it is to make use of this package.
-Just follow the instructions bellow.
+.. note:: 
 
-The first thing to do is to `install Bob
-<https://github.com/idiap/bob/wiki/Releases>`_ if you haven't done so already.
+  If you are reading this page through our GitHub portal and not through PyPI,
+  note **the development tip of the package may not be stable** or become
+  unstable in a matter of moments.
 
-The second thing to do is to `install the Replay Attack database
-<http://www.idiap.ch/dataset/replayattack/>`_ as explained in that web site.
-Save the base directory name in which you unpacked the database files and use
-it for the Feature Extraction phase bellow.
+  Go to `http://pypi.python.org/pypi/antispoofing.verification.gmm
+  <http://pypi.python.org/pypi/antispoofing.verification.gmm>`_ to download the
+  latest stable version of this package.
 
-.. warning::
+There are 2 options you can follow to get this package installed and
+operational on your computer: you can use automatic installers like `pip
+<http://pypi.python.org/pypi/pip/>`_ (or `easy_install
+<http://pypi.python.org/pypi/setuptools>`_) or manually download, unpack and
+use `zc.buildout <http://pypi.python.org/pypi/zc.buildout>`_ to create a
+virtual work environment just for this package.
 
-  This satellite package has been validated to work against ``Bob-1.0.5``. More
-  recent versions of the ``1.0.x`` branch may work, but no test has been done.
-  If you find difficulties reproducing the results in this package, make sure
-  you are using that precise version of ``Bob``.
+Using an automatic installer
+============================
 
-If you have `Bob` installed centrally
-=====================================
+Using ``pip`` is the easiest (shell commands are marked with a ``$`` signal)::
 
-If you have ``Bob`` installed by your system administrator, centrally, you just
-do::
+  $ pip install antispoofing.verification.gmm
 
-  $ python bootstrap.py
-  $ bin/buildout
+You can also do the same with ``easy_install``::
 
-And you are ready to start using the package.
+  $ easy_install antispoofing.verification.gmm
 
-If you have compiled `Bob` yourself
-===================================
+This will download and install this package plus any other required
+dependencies. It will also verify if the version of Bob you have installed
+is compatible.
 
-If you installed ``Bob`` in a location in which Python does not look by default,
-you will have to do a little editing on ``localbob.cfg`` to define the root
-directory containing the version of ``Bob`` you want to use and, then::
+This scheme works well with virtual environments by `virtualenv
+<http://pypi.python.org/pypi/virtualenv>`_ or if you have root access to your
+machine. Otherwise, we recommend you use the next option.
 
-  $ python bootstrap.py
-  $ bin/buildout -c localbob.cfg
+Using ``zc.buildout``
+=====================
+
+Download the latest version of this package from `PyPI
+<http://pypi.python.org/pypi/antispoofing.verification.gmm>`_ and unpack it in
+your working area. The installation of the toolkit itself uses `buildout
+<http://www.buildout.org/>`_. You don't need to understand its inner workings
+to use this package. Here is a recipe to get you started::
+  
+  $ python bootstrap.py $ ./bin/buildout
+
+These 2 commands should download and install all non-installed dependencies and
+get you a fully operational test and development environment.
 
 .. note::
 
-  You should use always the same Python interpreter you used to compile ``Bob``
-  with.
+  The python shell used in the first line of the previous command set
+  determines the python interpreter that will be used for all scripts developed
+  inside this package. Because this package makes use of `Bob
+  <http://idiap.github.com/bob>`_, you must make sure that the ``bootstrap.py``
+  script is called with the **same** interpreter used to build Bob, or
+  unexpected problems might occur.
+
+  If Bob is installed by the administrator of your system, it is safe to
+  consider it uses the default python interpreter. In this case, the above 3
+  command lines should work as expected. If you have Bob installed somewhere
+  else on a private directory, edit the file ``buildout.cfg`` **before**
+  running ``./bin/buildout``. Find the section named ``external`` and edit the
+  line ``egg-directories`` to point to the ``lib`` directory of the Bob
+  installation you want to use. For example::
+
+    [external]
+    egg-directories=/Users/crazyfox/work/bob/build/lib
+
+User Guide
+----------
 
 Configuration Tweaking (optional)
----------------------------------
+=================================
 
 The current scripts have been tunned to reproduce the results presented on some
 of our publications (as indicated above), as well as on FP7 Project `TABULA
@@ -101,7 +127,7 @@ to do so. Remember to set the option thoroughly through out all script calls or
 unexpected results may happen.
 
 Running the Experiments
------------------------
+=======================
 
 Follow the sequence described here to reproduce paper results.
 
@@ -141,7 +167,7 @@ details).
   <http://pypi.python.org/pypi/gridtk>`_ for a logging grid job manager for SGE.
 
 UBM Training
-------------
+============
 
 Run ``train_ubm.py`` to create the GMM Universal Background Model from selected
 features (in the enrollment/training subset).
@@ -169,7 +195,7 @@ requirements for the node you will be assigned to, to guarantee a minimum
 amount of memory.
 
 UBM Statistics Generation
--------------------------
+=========================
 
 Run ``generate_statistics.py`` to create the background statistics for all
 datafiles so we can calculate scores later. This step requires that the UBM is
@@ -189,7 +215,7 @@ hours to complete - taking into consideration current settings for SGE at
 Idiap.
 
 Client Model training
----------------------
+=====================
 
 .. note::
 
@@ -205,7 +231,7 @@ If you think the above job is too slow, you can throw it at the grid as well::
   $ ./bin/jman --array=35 ./script/enrol.py results/dct results/ubm.hdf5 results/models --grid
 
 Scoring
--------
+=======
 
 In this step you will score the videos (every N frames up to a certain frame
 number) against the generated client models. We do this exhaustively for both
@@ -219,7 +245,7 @@ this problem like this::
   $ ./bin/jman --array=35 ./bin/score.py results/stats results/ubm.hdf5 results/models results/scores --grid
 
 Full Score Files
-----------------
+================
 
 After scores are calculated, you need to put them together to setup development
 and test text files in a 4 or 5 column format. To do that, use the application
@@ -242,7 +268,7 @@ You can specify to use the attack protocols like this (avoid using the
   face was not detected on the originating video.
 
 Reproduce Paper Results
------------------------
+=======================
 
 To reproduce our paper results (~82% of attacks passing the verification
 system), you must generate two score files as defined above and then call a few
