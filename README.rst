@@ -2,10 +2,10 @@
  Parts-Based GMM Verification for the Replay Attack Database
 =============================================================
 
-This `Bob <http://www.idiap.ch/software/bob/>`_ satellite package allows you to
-run a baseline Parts-Based GMM face verification system on the Replay Attack
-Database. It explains how to setup this package, generate the Universal
-Background Model (UBM), client models and finally, scores.
+This `Bob`_ satellite package allows you to run a baseline Parts-Based GMM face
+verification system on the Replay Attack Database. It explains how to setup
+this package, generate the Universal Background Model (UBM), client models and
+finally, scores.
 
 If you use this package and/or its results, please cite the following
 publications:
@@ -92,10 +92,9 @@ get you a fully operational test and development environment.
 
   The python shell used in the first line of the previous command set
   determines the python interpreter that will be used for all scripts developed
-  inside this package. Because this package makes use of `Bob
-  <http://idiap.github.com/bob>`_, you must make sure that the ``bootstrap.py``
-  script is called with the **same** interpreter used to build Bob, or
-  unexpected problems might occur.
+  inside this package. Because this package makes use of `Bob`_, <you must make
+  sure that the ``bootstrap.py`` script is called with the **same** interpreter
+  used to build Bob, or unexpected problems might occur.
 
   If Bob is installed by the administrator of your system, it is safe to
   consider it uses the default python interpreter. In this case, the above 3
@@ -170,7 +169,9 @@ UBM Training
 ============
 
 Run ``train_ubm.py`` to create the GMM Universal Background Model from selected
-features (in the enrollment/training subset).
+features (in the enrollment/training subset)::
+  
+  $ ./bin/train_ubm.py results/dct results/ubm.hdf5
 
 .. note::
 
@@ -179,10 +180,6 @@ features (in the enrollment/training subset).
   the training set/enrollment are calculated. The job can take many gigabytes
   of physical memory from your machine, so we advise you to run it in a machine
   with, at least, 8 gigabytes of free memory.
-
-.. code-block:: sh
-
-  $ ./bin/train_ubm.py results/dct results/ubm.hdf5
 
 Unfortunately, you cannot easily parallelize this job. Nevertheless, you can
 submit it to the grid with the following command and avoid it to run on your
@@ -285,3 +282,7 @@ licit and spoofing test sets::
   FAR : 82.500% (330/400)
   FRR : 0.000% (0/80)
   HTER: 41.250%
+
+.. some links
+
+.. _bob: http://idiap.github.com/bob
