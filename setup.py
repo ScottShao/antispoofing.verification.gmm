@@ -2,14 +2,29 @@ from setuptools import setup, find_packages
 
 setup(
     name='antispoofing.verification.gmm',
-    version='1.0',
+    version='1.0.0',
     description='Replay-Attack Face Verification Package Based on a Parts-Based Gaussian Mixture Models',
-    license='LICENSE.txt',
-
+    url='http://pypi.python.org/pypi/antispoofing.verification.gmm',
+    license='GPLv3',
     author='Andre Anjos',
     author_email='andre.anjos@idiap.ch',
+    long_description=open('README.rst').read(),
 
+    # This line is required for any distutils based packaging.
     packages=find_packages(),
+    include_package_data=True,
+    zip_safe=True,
+
+    namespace_packages=[
+      "antispoofing",
+      "antispoofing.verification",
+      ],
+
+    install_requires=[
+      "setuptools",
+      "bob >= 1.0.0, < 1.1.0",
+      ],
+
 
     entry_points={
       'console_scripts': [
@@ -25,10 +40,4 @@ setup(
         ],
       },
 
-    long_description=open('readme.rst').read(),
-
-    install_requires=[
-        "bob",      # base signal proc./machine learning library
-        "argparse", # better option parsing
-    ],
-)
+    )
