@@ -8,20 +8,16 @@ import numpy
 import bob
 
 def load_data(files):
-  """Concatenates a list of blitz arrays into an Arrayset"""
-  data = bob.io.Arrayset()
-  for f in files:
-    data.extend(bob.io.load(str(f)))
+  """Concatenates a list of arrays into an arrayset"""
+  data = bob.io.load(files)
   return data
 
-def NormalizeStdArrayset(arrayset):
+def normalize_std_arrayset(arrayset):
   """Applies a unit variance normalization to an arrayset"""
-  # Loads the data in RAM
-  arrayset.load()
 
   # Initializes variables
-  length = arrayset.shape[0]
-  n_samples = len(arrayset)
+  n_samples = arrayset.shape[0]
+  length = arrayset.shape[1]
   mean = numpy.ndarray((length,), 'float64')
   std = numpy.ndarray((length,), 'float64')
 
@@ -29,8 +25,8 @@ def NormalizeStdArrayset(arrayset):
   std.fill(0)
 
   # Computes mean and variance
-  for array in arrayset:
-    x = array.astype('float64')
+  for k in range(n_samples):
+    x = arrayset[k,:].astype('float64')
     mean += x
     std += (x ** 2)
 
@@ -39,11 +35,12 @@ def NormalizeStdArrayset(arrayset):
   std -= (mean ** 2)
   std = std ** 0.5 # sqrt(std)
 
-  arStd = bob.io.Arrayset()
-  for array in arrayset:
-    arStd.append(array.astype('float64') / std)
+  ar_std_list = []
+  for k in range(n_samples):
+    ar_std_list.append(arrayset[k,:].astype('float64') / std)
+  ar_std = numpy.vstack(ar_std_list)
 
-  return (arStd,std)
+  return (ar_std,std)
 
 
 def multiplyVectorsByFactors(matrix, vector):
@@ -59,17 +56,17 @@ def train_ubm(train_files, ubm_filename, n_gaussians=512, iterk=500,
     norm_KMeans=False):
   """Trains a Universal Background Model and saves it to file"""
 
-  # Loads the data into an Arrayset
+  # Loads the data into an arrayset
   ar = load_data(train_files.itervalues())
 
   # Computes input size
-  input_size = ar.shape[0]
+  input_size = ar.shape[1]
 
-  # Normalizes the Arrayset if required
+  # Normalizes the arrayset if required
   if not norm_KMeans:
     normalizedAr = ar
   else:
-    (normalizedAr,stdAr) = NormalizeStdArrayset(ar)
+    (normalizedAr,stdAr) = normalize_std_arrayset(ar)
 
   # Creates the machines (KMeans and GMM)
   kmeans = bob.machine.KMeansMachine(n_gaussians, input_size)
@@ -130,7 +127,7 @@ def generate_statistics(features_input, ubm, gmmstats_output, force=False):
     else:
       print "Computing statistics from features %s." % (features_input[k])
       # Loads input features file
-      features = bob.io.Arrayset(str(features_input[k]))
+      features = bob.io.load(str(features_input[k]))
 
       # Accumulates statistics
       gmmstats.init()
@@ -152,7 +149,7 @@ def enrol(enrol_files, model_path, ubm_filename, iterg=1,
     adapt_variance=False, torch3_map=False, alpha_torch3=0.5):
   """Enrols a GMM using MAP adaptation"""
 
-  # Loads the data into an Arrayset
+  # Loads the data into an arrayset
   ar = load_data(enrol_files.itervalues())
 
   # Loads the UBM/prior gmm
