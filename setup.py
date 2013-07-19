@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='antispoofing.verification.gmm',
-    version='1.0.1',
+    version='1.0.2',
     description='Replay-Attack Face Verification Package Based on a Parts-Based Gaussian Mixture Models',
     url='http://pypi.python.org/pypi/antispoofing.verification.gmm',
     license='GPLv3',
